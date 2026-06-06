@@ -3,9 +3,8 @@ import MobileRedirect from "@/components/MobileRedirect";
 import ScrollSequence from "@/components/ScrollSequence";
 import SpiderSequence from "@/components/SpiderSequence";
 import BrandStatement from "@/components/BrandStatement";
-import StatsBand from "@/components/StatsBand";
-import StylesCarousel from "@/components/StylesCarousel";
-import ParallaxSection from "@/components/ParallaxSection";
+import ServiceSlider from "@/components/ServiceSlider";
+import GalleryPinterest from "@/components/GalleryPinterest";
 import Artists from "@/components/Artists";
 import Process from "@/components/Process";
 import Testimonials from "@/components/Testimonials";
@@ -20,10 +19,14 @@ export default function Home() {
       <Header />
       <ScrollSequence />
       <BrandStatement />
+      {/* Buddha unzip — the stats now fold into the end of this sequence
+          (standalone StatsBand removed). */}
       <SpiderSequence embedded />
-      <StatsBand />
-      <StylesCarousel ambient />
-      <ParallaxSection />
+      {/* Styles we master — featured-image slider (services). Reference animal
+          assets + colours for now; re-skin to tattoo + gold later. */}
+      <ServiceSlider />
+      {/* Gallery — light/Pinterest skin (dark version retired). */}
+      <GalleryPinterest theme="light" />
       <Artists />
       <Process />
       <Testimonials />

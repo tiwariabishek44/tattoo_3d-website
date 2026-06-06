@@ -1,5 +1,5 @@
 import Reveal from "./Reveal";
-import { SERIF, SANS, COLORS, eyebrow, frame } from "@/lib/theme";
+import { SERIF, SANS, COLORS, eyebrow, frame, GUTTER } from "@/lib/theme";
 
 const ARTISTS = [
   { name: "Tenzin", specialty: "Fine line · Custom", img: frame(10) },
@@ -13,10 +13,10 @@ export default function Artists() {
     <section
       style={{
         background: COLORS.ink,
-        padding: "clamp(90px, 16vh, 200px) clamp(24px, 5vw, 96px)",
+        padding: `clamp(90px, 16vh, 200px) ${GUTTER}`,
       }}
     >
-      <div style={{ maxWidth: 1200, margin: "0 auto" }}>
+      <div>
         <Reveal>
           <div style={{ ...eyebrow(), marginBottom: "1.2rem" }}>The hands</div>
         </Reveal>

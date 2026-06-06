@@ -1,5 +1,5 @@
 import Reveal from "./Reveal";
-import { SERIF, SANS, COLORS, eyebrow } from "@/lib/theme";
+import { SERIF, SANS, COLORS, eyebrow, GUTTER } from "@/lib/theme";
 
 const QUOTES = [
   {
@@ -27,12 +27,12 @@ export default function Testimonials() {
     <section
       style={{
         background: COLORS.ink,
-        padding: "clamp(90px, 16vh, 200px) clamp(24px, 5vw, 96px)",
+        padding: `clamp(90px, 16vh, 200px) ${GUTTER}`,
       }}
     >
-      <div style={{ maxWidth: 1200, margin: "0 auto" }}>
+      <div>
         <Reveal>
-          <div style={{ ...eyebrow(), marginBottom: "1.2rem", textAlign: "center" }}>
+          <div style={{ ...eyebrow(), marginBottom: "1.2rem" }}>
             In their words
           </div>
         </Reveal>
@@ -45,7 +45,6 @@ export default function Testimonials() {
               lineHeight: 1.06,
               color: COLORS.offWhite,
               margin: "0 0 clamp(40px, 6vh, 80px)",
-              textAlign: "center",
             }}
           >
             Stories worth wearing.

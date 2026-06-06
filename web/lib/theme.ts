@@ -22,6 +22,12 @@ export const eyebrow = (color: string = COLORS.gold): React.CSSProperties => ({
   color,
 });
 
+// ── Alignment DNA (adopted from the gallery section) ──────────────────────
+// One consistent left/right rail (near full-bleed) applied across every segment
+// so the whole site shares the same margins. (Typography stays each section's
+// own — only the alignment/gutter is unified.)
+export const GUTTER = "clamp(16px, 1.8vw, 28px)"; // shared side gutter / left rail
+
 // Pick a hero frame as a placeholder image (swap for real photos later).
 export const frame = (n: number) =>
   `/frames/frame_${String(n).padStart(6, "0")}.webp`;

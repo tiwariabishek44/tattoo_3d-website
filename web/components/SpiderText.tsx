@@ -1,10 +1,12 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import {
   MotionValue,
   motion,
   useTransform,
   useMotionTemplate,
+  useMotionValueEvent,
 } from "framer-motion";
 
 // Slogan layer for the spider story. Beats are bottom-centered film titles
@@ -178,6 +180,104 @@ function BeatBlock({
   );
 }
 
+// Stats — folded into the END of the Buddha sequence (replaces the standalone
+// StatsBand). Fade in over the held reveal, beneath the "Ink that's alive." slogan.
+const STATS = [
+  { value: 12, suffix: "+", label: "Years of craft" },
+  { value: 8, suffix: "", label: "Resident artists" },
+  { value: 5000, suffix: "+", label: "Pieces inked" },
+  { value: 30, suffix: "+", label: "Awards & features" },
+];
+
+function Stat({
+  value,
+  suffix,
+  label,
+  go,
+}: {
+  value: number;
+  suffix: string;
+  label: string;
+  go: boolean;
+}) {
+  const [n, setN] = useState(0);
+  useEffect(() => {
+    if (!go) return;
+    let raf = 0;
+    let start = 0;
+    const dur = 1400;
+    const step = (ts: number) => {
+      if (!start) start = ts;
+      const p = Math.min(1, (ts - start) / dur);
+      const eased = 1 - Math.pow(1 - p, 3);
+      setN(Math.round(value * eased));
+      if (p < 1) raf = requestAnimationFrame(step);
+    };
+    raf = requestAnimationFrame(step);
+    return () => cancelAnimationFrame(raf);
+  }, [go, value]);
+  return (
+    <div style={{ textAlign: "center" }}>
+      <div
+        style={{
+          fontFamily: SERIF,
+          fontWeight: 500,
+          fontSize: "clamp(2rem, 3.4vw, 3.2rem)",
+          lineHeight: 1,
+          color: GOLD,
+          textShadow: "0 2px 20px rgba(0,0,0,0.7)",
+        }}
+      >
+        {n.toLocaleString()}
+        {suffix}
+      </div>
+      <div
+        style={{
+          fontFamily: SANS,
+          textTransform: "uppercase",
+          letterSpacing: "0.16em",
+          fontSize: "0.68rem",
+          color: "rgba(255,255,255,0.72)",
+          marginTop: "0.6rem",
+        }}
+      >
+        {label}
+      </div>
+    </div>
+  );
+}
+
+function StatsReveal({ progress }: { progress: MotionValue<number> }) {
+  const opacity = useTransform(progress, [0.82, 0.94], [0, 1]);
+  const y = useTransform(progress, [0.82, 0.94], [24, 0]);
+  const [go, setGo] = useState(false);
+  useMotionValueEvent(progress, "change", (p) => {
+    if (p > 0.84) setGo(true);
+  });
+  return (
+    <motion.div
+      style={{
+        opacity,
+        y,
+        position: "absolute",
+        left: 0,
+        right: 0,
+        bottom: "clamp(26px, 6vh, 60px)",
+        display: "flex",
+        justifyContent: "center",
+        gap: "clamp(26px, 5vw, 80px)",
+        flexWrap: "wrap",
+        padding: "0 clamp(16px, 4vw, 48px)",
+        pointerEvents: "none",
+      }}
+    >
+      {STATS.map((s) => (
+        <Stat key={s.label} {...s} go={go} />
+      ))}
+    </motion.div>
+  );
+}
+
 export default function SpiderText({
   progress,
   embedded = false,
@@ -192,6 +292,9 @@ export default function SpiderText({
       {BEATS.map((beat, i) => (
         <BeatBlock key={i} progress={progress} beat={beat} embedded={embedded} />
       ))}
+
+      {/* stats — folded into the held reveal (homepage/embedded only) */}
+      {embedded && <StatsReveal progress={progress} />}
 
       {/* scroll hint — only on the standalone page (odd mid-homepage) */}
       {!embedded && (

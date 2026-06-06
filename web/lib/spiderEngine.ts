@@ -3,7 +3,11 @@
 // (beat 1 → beat 3) stitched into one continuous scrub. Kept separate from
 // FrameEngine so the machine hero ("/") is never at risk.
 
-export type Segment = { base: string; count: number }; // e.g. { base: "/frames-beat1", count: 240 }
+export type Segment = {
+  base: string;
+  count: number; // number of frames to use
+  start?: number; // first frame number to use (1-based), default 1
+}; // e.g. { base: "/frames-beat1", start: 70, count: 116 }
 
 export type SpiderConfig = {
   segments: Segment[];
@@ -101,8 +105,9 @@ export class SpiderEngine {
   private path(i: number) {
     let seg = 0;
     while (seg < this.cfg.segments.length - 1 && i >= this.offsets[seg + 1]) seg++;
-    const local = i - this.offsets[seg] + 1; // 1-based within the segment
-    return `${this.cfg.segments[seg].base}/frame_${String(local).padStart(this.cfg.pad, "0")}.webp`;
+    const s = this.cfg.segments[seg];
+    const local = i - this.offsets[seg] + (s.start ?? 1); // frame number within the segment
+    return `${s.base}/frame_${String(local).padStart(this.cfg.pad, "0")}.webp`;
   }
 
   private loadFrame(i: number) {

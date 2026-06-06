@@ -15,9 +15,9 @@ import { SpiderEngine, SpiderConfig } from "@/lib/spiderEngine";
 // the message. The scrub finishes early (SCRUB_END) and HOLDS on the reveal so the
 // slogan + CTA land over the settled spider — the "held breath."
 const SEGMENTS = [
-  // frames 201–240 are near-identical (held reveal) → cap at 200; the rest stay
-  // on disk, just unused. The SCRUB_END tail then holds on frame 200.
-  { base: "/frames-beat1", count: 185 }, // unzip → reveal (of 240 on disk)
+  // frames 186–240 are near-identical (held reveal) → cap at 185; the rest stay
+  // on disk, just unused. The SCRUB_END tail then holds on the reveal.
+  { base: "/frames-beat1", count: 185 }, // frames 1 → 185 (of 240 on disk)
 ];
 const VH_TOTAL = 1400; // scroll length (1080 → 1400 = noticeably slower scrub, 240 frames)
 const SCRUB_END = 0.82; // frames complete here; the tail holds on the reveal

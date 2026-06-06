@@ -38,6 +38,8 @@ Full persona: [.claude/skills/creative-lead/SKILL.md](.claude/skills/creative-le
 | [spider-reveal-sequence.md](spider-reveal-sequence.md) | "The Awakening" — 3-beat hoodie unzip → chest reveal → spider crawl sequence | spider sequence work |
 | [web/DESIGN2_SPIDER_PLAN.md](web/DESIGN2_SPIDER_PLAN.md) | **Design 2** — `/design-2` scroll-scrub page (now the **Buddha unzip**; engine + slogans + build status) | Design 2 web work |
 | [web/REVEAL_ZOOM_PLAN.md](web/REVEAL_ZOOM_PLAN.md) | **Reveal-zoom** — web-layer scroll camera for the unzip (close-up → pull back → hold) | reveal-zoom / camera work |
+| [web/STYLES_WE_MASTER_PLAN.md](web/STYLES_WE_MASTER_PLAN.md) | **Styles we master** soul upgrade — pinned scroll-driven "Service Reveal" (Concept 3 / cinematic chosen) (SSOT) | styles/services section work |
+| [web/SERVICE_MICRO_SEQUENCE_PLAN.md](web/SERVICE_MICRO_SEQUENCE_PLAN.md) | **Future elevation** — turn each service still into a scroll-scrubbed micro-sequence (PARKED until the 8 stills ship) | service micro-sequence work |
 | [hero-text-layer.md](hero-text-layer.md) | Slogan/brand-story + depth layer plan for the hero (Teyung Tattoo Ink) | text/UI work |
 | [homepage-plan.md](homepage-plan.md) | Full landing-page completion plan (12 sections, design system, color rhythm) | building out the whole page |
 | [frame-sequence-stack.md](frame-sequence-stack.md) | Web delivery (GSAP/canvas scroll-scrub) | when building the site |

@@ -10,12 +10,14 @@ const NAV: { label: string; href: string }[] = [
   { label: "After Care", href: "#" },
   { label: "Gallery", href: "#" },
   { label: "Design 2", href: "/design-2" },
+  { label: "Concept 3", href: "/concept-3" },
   { label: "Contact", href: "#" },
 ];
 
 export default function Header() {
   const [scrolled, setScrolled] = useState(false);
   const [hidden, setHidden] = useState(false);
+  const [overImage, setOverImage] = useState(false);
   const lastY = useRef(0);
 
   useEffect(() => {
@@ -29,11 +31,22 @@ export default function Header() {
         if (Math.abs(diff) > 2) setHidden(diff > 0); // scroll down → hide, up → show
       }
       lastY.current = y;
+      // go transparent over any full-bleed section that opts in (e.g. the
+      // service slider) while it occupies the top of the viewport.
+      let over = false;
+      document.querySelectorAll("[data-transparent-header]").forEach((el) => {
+        const r = (el as HTMLElement).getBoundingClientRect();
+        if (r.top <= 64 && r.bottom > 64) over = true;
+      });
+      setOverImage(over);
     };
     onScroll();
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
+
+  // frosted bar only when scrolled AND not over a transparent-header section.
+  const frosted = scrolled && !overImage;
 
   return (
     <header
@@ -51,16 +64,17 @@ export default function Header() {
           ? "12px clamp(24px, 4vw, 64px)"
           : "clamp(16px, 2vw, 26px) clamp(24px, 4vw, 64px)",
         fontFamily: SANS,
-        // transparent at the top (blends with hero) → solid frosted on scroll
-        background: scrolled
+        // transparent at the top / over a transparent-header section → frosted on scroll
+        background: frosted
           ? "rgba(7,6,5,0.82)"
           : "linear-gradient(to bottom, rgba(0,0,0,0.5), rgba(0,0,0,0))",
-        backdropFilter: scrolled ? "blur(14px)" : "none",
-        WebkitBackdropFilter: scrolled ? "blur(14px)" : "none",
-        borderBottom: scrolled
+        backdropFilter: frosted ? "blur(14px)" : "none",
+        WebkitBackdropFilter: frosted ? "blur(14px)" : "none",
+        borderBottom: frosted
           ? "1px solid rgba(203,164,90,0.16)"
           : "1px solid transparent",
-        transform: hidden ? "translateY(-100%)" : "translateY(0)",
+        // stay shown over a transparent-header section (don't auto-hide there)
+        transform: hidden && !overImage ? "translateY(-100%)" : "translateY(0)",
         transition:
           "transform 0.35s ease, background 0.35s ease, backdrop-filter 0.35s ease, padding 0.35s ease, border-color 0.35s ease",
         pointerEvents: "none",

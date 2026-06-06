@@ -1,5 +1,5 @@
 import Reveal from "./Reveal";
-import { SERIF, SANS, COLORS, eyebrow, frame } from "@/lib/theme";
+import { SERIF, SANS, COLORS, eyebrow, frame, GUTTER } from "@/lib/theme";
 
 export default function BookingCTA() {
   return (
@@ -10,7 +10,7 @@ export default function BookingCTA() {
         backgroundImage: `linear-gradient(rgba(7,6,5,0.76), rgba(7,6,5,0.93)), url(${frame(170)})`,
         backgroundSize: "cover",
         backgroundPosition: "center",
-        padding: "clamp(120px, 24vh, 300px) clamp(24px, 6vw, 120px)",
+        padding: `clamp(120px, 24vh, 300px) ${GUTTER}`,
         textAlign: "center",
         overflow: "hidden",
       }}

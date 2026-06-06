@@ -1,5 +1,5 @@
 import Reveal from "./Reveal";
-import { SERIF, SANS, COLORS, eyebrow } from "@/lib/theme";
+import { SERIF, SANS, COLORS, eyebrow, GUTTER } from "@/lib/theme";
 
 const STEPS = [
   { n: "1", title: "Consult", desc: "We listen to your idea, placement and story — no rush, no pressure." },
@@ -14,10 +14,10 @@ export default function Process() {
       style={{
         background: COLORS.cream,
         color: COLORS.inkText,
-        padding: "clamp(90px, 16vh, 200px) clamp(24px, 5vw, 96px)",
+        padding: `clamp(90px, 16vh, 200px) ${GUTTER}`,
       }}
     >
-      <div style={{ maxWidth: 1180, margin: "0 auto", textAlign: "center" }}>
+      <div style={{ textAlign: "left" }}>
         <Reveal>
           <div style={{ ...eyebrow(COLORS.gold), marginBottom: "1.2rem" }}>
             How it works

@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence, PanInfo } from "framer-motion";
-import { SERIF, SANS, COLORS, eyebrow, frame } from "@/lib/theme";
+import { SERIF, SANS, COLORS, eyebrow, frame, GUTTER } from "@/lib/theme";
 
 // Real tattoo photos where available; the two without a photo (Fine Line, Custom)
 // fall back to a machine frame for now.
@@ -117,7 +117,7 @@ export default function StylesCarousel({
       style={{
         position: "relative",
         background: bg,
-        padding: "clamp(90px, 16vh, 200px) clamp(16px, 4vw, 80px)",
+        padding: `clamp(90px, 16vh, 200px) ${GUTTER}`,
         overflow: "hidden",
         outline: "none",
       }}
@@ -160,8 +160,6 @@ export default function StylesCarousel({
         style={{
           position: "relative",
           zIndex: 1,
-          maxWidth: 1200,
-          margin: "0 auto",
         }}
       >
         {label && (
