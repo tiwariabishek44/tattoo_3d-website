@@ -106,6 +106,16 @@ export default function GalleryPinterest({
     return () => window.removeEventListener("keydown", onKey);
   }, [box, filtered.length]);
 
+  // Lock page scroll while lightbox is open — Pinterest behaviour
+  useEffect(() => {
+    if (box === null) {
+      document.body.style.overflow = "";
+      return;
+    }
+    document.body.style.overflow = "hidden";
+    return () => { document.body.style.overflow = ""; };
+  }, [box]);
+
   return (
     <section
       style={{
@@ -233,7 +243,8 @@ export default function GalleryPinterest({
                   transition: "transform 0.5s ease",
                 }}
               />
-              {/* hover overlay — dark wash + expand (no red Save button) */}
+              {/* hover overlay — Pinterest-pin style (per reference): red Save,
+                  light Visit-site pill, dark round expand. */}
               <div
                 style={{
                   position: "absolute",
@@ -244,16 +255,54 @@ export default function GalleryPinterest({
                   pointerEvents: "none",
                 }}
               >
+                {/* Save — Pinterest red */}
                 <span
                   style={{
                     position: "absolute",
-                    top: 10,
-                    right: 10,
-                    width: 34,
-                    height: 34,
-                    borderRadius: "50%",
-                    background: "rgba(255,255,255,0.92)",
+                    top: 12,
+                    right: 12,
+                    background: "#E60023",
+                    color: "#fff",
+                    fontFamily: SANS,
+                    fontWeight: 700,
+                    fontSize: "0.92rem",
+                    padding: "0.6rem 1.15rem",
+                    borderRadius: 999,
+                  }}
+                >
+                  Save
+                </span>
+                {/* Visit-site style pill — light */}
+                <span
+                  style={{
+                    position: "absolute",
+                    left: 12,
+                    bottom: 12,
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 6,
+                    background: "rgba(255,255,255,0.95)",
                     color: "#111",
+                    fontFamily: SANS,
+                    fontWeight: 600,
+                    fontSize: "0.8rem",
+                    padding: "0.5rem 0.9rem",
+                    borderRadius: 999,
+                  }}
+                >
+                  <span aria-hidden>↗</span> {it.cat}
+                </span>
+                {/* expand — dark round (the reference's bottom-right button) */}
+                <span
+                  style={{
+                    position: "absolute",
+                    right: 12,
+                    bottom: 12,
+                    width: 38,
+                    height: 38,
+                    borderRadius: "50%",
+                    background: "rgba(18,18,18,0.62)",
+                    color: "#fff",
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "center",
@@ -262,20 +311,6 @@ export default function GalleryPinterest({
                 >
                   ⤢
                 </span>
-                <span
-                  style={{
-                    position: "absolute",
-                    left: 12,
-                    bottom: 12,
-                    color: "#fff",
-                    fontFamily: SANS,
-                    fontSize: "0.76rem",
-                    letterSpacing: "0.1em",
-                    textTransform: "uppercase",
-                  }}
-                >
-                  {it.cat}
-                </span>
               </div>
             </motion.div>
           );
@@ -283,7 +318,10 @@ export default function GalleryPinterest({
         </div>
       </div>
 
-      {/* lightbox */}
+      {/* lightbox — Pinterest exact:
+          dark glassmorphism backdrop, top bar (✕ | Share Save),
+          ‹ card › nav row, ··· on card top-right, sparkle lens bottom-right,
+          large red Save pill below card. */}
       <AnimatePresence>
         {box !== null && (
           <motion.div
@@ -295,56 +333,131 @@ export default function GalleryPinterest({
               position: "fixed",
               inset: 0,
               zIndex: 200,
-              background: "rgba(5,4,3,0.92)",
               display: "flex",
+              flexDirection: "column",
               alignItems: "center",
               justifyContent: "center",
-              padding: "4vh 4vw",
+              gap: 20,
+              padding: "72px clamp(12px, 4vw, 60px) clamp(24px, 4vh, 48px)",
+              overflow: "hidden",
+              background: "rgba(0,0,0,0.12)",
+              backdropFilter: "blur(10px)",
+              WebkitBackdropFilter: "blur(10px)",
             }}
           >
-            <button
-              aria-label="Close"
-              onClick={() => setBox(null)}
-              style={{ ...arrowBtn, top: 24, right: 24, left: "auto" }}
-            >
-              ✕
-            </button>
-            <button
-              aria-label="Previous"
-              onClick={(e) => {
-                e.stopPropagation();
-                setBox((b) => (b! - 1 + filtered.length) % filtered.length);
-              }}
-              style={{ ...arrowBtn, left: 24 }}
-            >
-              ‹
-            </button>
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <motion.img
-              key={filtered[box].id}
-              initial={{ opacity: 0, scale: 0.96 }}
-              animate={{ opacity: 1, scale: 1 }}
-              src={filtered[box].src}
-              alt={filtered[box].cat}
-              onClick={(e) => e.stopPropagation()}
+            {/* black weight layer — sits over the blur, under all content */}
+            <div
               style={{
-                maxWidth: "90vw",
-                maxHeight: "90vh",
-                objectFit: "contain",
-                borderRadius: 8,
-                boxShadow: "0 30px 100px rgba(0,0,0,0.7)",
+                position: "absolute",
+                inset: 0,
+                background: "rgba(0,0,0,0.42)",
+                pointerEvents: "none",
+                zIndex: 0,
               }}
             />
-            <button
-              aria-label="Next"
-              onClick={(e) => {
-                e.stopPropagation();
-                setBox((b) => (b! + 1) % filtered.length);
+
+            {/* top bar: ✕ left | Share Save right */}
+            <div
+              onClick={(e) => e.stopPropagation()}
+              style={{
+                position: "fixed",
+                top: 0,
+                left: 0,
+                right: 0,
+                zIndex: 210,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+                padding: "14px clamp(16px, 3vw, 36px)",
               }}
-              style={{ ...arrowBtn, right: 24 }}
             >
-              ›
-            </button>
+              <button aria-label="Close" onClick={() => setBox(null)} style={circleBtn}>
+                ✕
+              </button>
+              <div style={{ display: "flex", gap: 10 }}>
+                <button style={shareBtn}>
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
+                    <circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/>
+                    <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/>
+                  </svg>
+                  Share
+                </button>
+                <button style={saveBtn}>Save</button>
+              </div>
+            </div>
+
+            {/* image card — overflow visible so child buttons can overlap the edge */}
+            <motion.div
+              key={filtered[box].id}
+              onClick={(e) => e.stopPropagation()}
+              initial={{ opacity: 0, scale: 0.96 }}
+              animate={{ opacity: 1, scale: 1 }}
+              style={{ position: "relative", overflow: "visible", zIndex: 205 }}
+            >
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={filtered[box].src}
+                alt={filtered[box].cat}
+                style={{
+                  display: "block",
+                  maxWidth: "min(80vw, 520px)",
+                  maxHeight: "72vh",
+                  objectFit: "contain",
+                  borderRadius: 24,
+                  boxShadow: "0 32px 100px rgba(0,0,0,0.85)",
+                }}
+              />
+
+              {/* ··· more options — top-right of card */}
+              <button
+                aria-label="More options"
+                style={{
+                  position: "absolute",
+                  top: 12,
+                  right: 12,
+                  width: 36,
+                  height: 36,
+                  borderRadius: "50%",
+                  border: "none",
+                  background: "rgba(22,22,22,0.78)",
+                  backdropFilter: "blur(8px)",
+                  color: "#fff",
+                  fontSize: "0.55rem",
+                  letterSpacing: "0.18em",
+                  cursor: "pointer",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  paddingLeft: 2,
+                }}
+              >
+                ●●●
+              </button>
+
+              {/* sparkle / visual-search lens — bottom-right, overlapping edge */}
+              <button
+                aria-label="Visual search"
+                style={{
+                  position: "absolute",
+                  bottom: 12,
+                  right: 12,
+                  width: 40,
+                  height: 40,
+                  borderRadius: "50%",
+                  border: "none",
+                  background: "#fff",
+                  color: "#333",
+                  fontSize: "1rem",
+                  cursor: "pointer",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  boxShadow: "0 2px 14px rgba(0,0,0,0.3)",
+                }}
+              >
+                ✦
+              </button>
+            </motion.div>
           </motion.div>
         )}
       </AnimatePresence>
@@ -352,22 +465,50 @@ export default function GalleryPinterest({
   );
 }
 
-const arrowBtn: React.CSSProperties = {
-  position: "fixed",
-  top: "50%",
-  transform: "translateY(-50%)",
-  zIndex: 210,
-  width: 52,
-  height: 52,
-  borderRadius: "50%",
-  border: "1px solid rgba(255,255,255,0.25)",
-  background: "rgba(0,0,0,0.4)",
-  color: "#fff",
-  fontSize: "1.4rem",
+const circleBtn: React.CSSProperties = {
+  width: 62,
+  height: 62,
+  borderRadius: 18,
+  border: "none",
+  background: "rgba(210,210,210,0.92)",
+  color: "#111",
+  fontSize: "1.35rem",
   lineHeight: 1,
   cursor: "pointer",
   display: "flex",
   alignItems: "center",
   justifyContent: "center",
   fontFamily: SANS,
+  fontWeight: 700,
+  boxShadow: "0 2px 10px rgba(0,0,0,0.18)",
 };
+
+const saveBtn: React.CSSProperties = {
+  background: "#E60023",
+  color: "#fff",
+  fontFamily: SANS,
+  fontWeight: 700,
+  fontSize: "1.1rem",
+  padding: "0.9rem 1.9rem",
+  borderRadius: 16,
+  border: "none",
+  cursor: "pointer",
+  letterSpacing: "0.01em",
+};
+
+const shareBtn: React.CSSProperties = {
+  background: "rgba(210,210,210,0.92)",
+  color: "#111",
+  fontFamily: SANS,
+  fontWeight: 700,
+  fontSize: "1.1rem",
+  padding: "0.9rem 1.9rem",
+  borderRadius: 16,
+  border: "none",
+  cursor: "pointer",
+  display: "flex",
+  alignItems: "center",
+  gap: 8,
+  boxShadow: "0 1px 8px rgba(0,0,0,0.12)",
+};
+
