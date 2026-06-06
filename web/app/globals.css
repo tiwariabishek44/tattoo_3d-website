@@ -1,0 +1,31 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html,
+body {
+  background: #070605;
+  color: #f2efe9;
+}
+
+canvas {
+  display: block;
+  background: #070605;
+}
+
+.nav-link {
+  font-family: var(--font-inter), system-ui, sans-serif;
+  color: #cba45a;
+  text-decoration: none;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  font-size: 0.98rem;
+  font-weight: 500;
+  white-space: nowrap;
+  transition: color 0.25s ease;
+}
+.nav-link:hover {
+  color: #f2efe9;
+}

@@ -1,0 +1,16 @@
+{
+  "name": "frames-engine",
+  "version": "1.0.0",
+  "description": "Video → lossless PNG masters → optimized WebP/AVIF frames for scroll-scrub web assets.",
+  "private": true,
+  "bin": {
+    "frames-engine": "frames-engine.js"
+  },
+  "scripts": {
+    "convert": "node frames-engine.js"
+  },
+  "dependencies": {
+    "ffmpeg-static": "^5.2.0",
+    "sharp": "^0.33.0"
+  }
+}

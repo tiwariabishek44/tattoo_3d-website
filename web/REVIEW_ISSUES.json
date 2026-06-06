@@ -1,0 +1,147 @@
+{
+  "project": "Teyung Tattoo Ink — scroll-driven hero site (web/)",
+  "scope": "MOBILE VIEW ONLY",
+  "reviewer": "Kael Mercer (Creative Lead)",
+  "date": "2026-06-05",
+  "summary": "Mobile-only review. The desktop experience passes; mobile does not. The scrub freezes/janks because all frames are held decoded and re-decode on the main thread mid-scroll under memory pressure, and the hero text + header are not laid out for small screens.",
+  "verdict": {
+    "mobile": "FAIL",
+    "blocking_for_launch": ["MOBILE-001", "MOBILE-002"]
+  },
+  "issues": [
+    {
+      "id": "MOBILE-001",
+      "title": "Scroll jank / freeze — frame sticks then snaps during scrub",
+      "severity": "critical",
+      "category": "performance",
+      "blocking": true,
+      "symptom": "On mobile the frame scrub is not buttery: it stutters, drops frames, and freezes — the frame sticks in place while the page keeps scrolling, then snaps to catch up.",
+      "files": [
+        "web/components/ScrollSequence.tsx:48-55",
+        "web/components/ScrollSequence.tsx:95",
+        "web/components/ScrollSequence.tsx:99-101",
+        "web/components/ScrollSequence.tsx:108-116"
+      ],
+      "root_cause": {
+        "name": "Main-thread image re-decoding under memory pressure",
+        "explanation": "240 frames at 1280x720 are preloaded with new Image() and held forever (~880 MB decoded). When mobile memory gets tight the browser evicts the decoded bitmaps but keeps the <img> objects. The rAF loop then calls drawImage() on an evicted frame, forcing a synchronous 1280x720 re-decode on the main thread mid-scroll. That decode blocks the frame (the freeze); scroll runs on the compositor and keeps moving, so the canvas falls behind and snaps when the decode finishes."
+      },
+      "contributing_factors": [
+        {
+          "factor": "rAF loop never idles",
+          "file": "web/components/ScrollSequence.tsx:108-116",
+          "detail": "The canvas is redrawn every frame even when currentFrame has settled, continuously competing with the scroll compositor for the main thread."
+        },
+        {
+          "factor": "Canvas rendered at full devicePixelRatio",
+          "file": "web/components/ScrollSequence.tsx:99-101",
+          "detail": "At mobile DPR 3 the canvas is ~1170x2532 and is fully re-filled every frame with default high-quality smoothing — ~2.25x the pixels of DPR 2 for no visible gain."
+        },
+        {
+          "factor": "Decoding happens on the main thread",
+          "file": "web/components/ScrollSequence.tsx:48-55",
+          "detail": "new Image() (no createImageBitmap / img.decode) means every initial and re-decode lands on the thread that must keep scroll smooth."
+        },
+        {
+          "factor": "240 parallel image requests on load",
+          "file": "web/components/ScrollSequence.tsx:48-54",
+          "detail": "All frames request and decode at once, causing a decode storm + network contention that makes the first scroll especially janky."
+        }
+      ],
+      "ordered_solutions": [
+        {
+          "priority": 1,
+          "fix": "Decode with createImageBitmap() instead of new Image()",
+          "why": "Decodes off the main thread into a GPU-ready bitmap that drawImage will not re-decode. Directly removes the freeze.",
+          "effort": "medium"
+        },
+        {
+          "priority": 2,
+          "fix": "Stop holding all 240 frames decoded — use a sliding window (decode ~20 around current index, close() the rest) and/or ship a downscaled mobile set (854x480 and/or every 2nd frame -> 120 frames)",
+          "why": "Removes the memory pressure that causes bitmap eviction in the first place.",
+          "effort": "medium"
+        },
+        {
+          "priority": 3,
+          "fix": "Cap DPR at 2 (Math.min(dpr, 2)) and set ctx.imageSmoothingQuality = 'low' on mobile",
+          "why": "Much cheaper per-frame canvas fill with no visible quality loss.",
+          "effort": "low"
+        },
+        {
+          "priority": 4,
+          "fix": "Idle the rAF loop — stop drawing once currentFrame settles, resume on the next scroll change",
+          "why": "Frees the main thread for the compositor between frames so the scrub feels buttery, not just unfrozen.",
+          "effort": "low"
+        },
+        {
+          "priority": 5,
+          "fix": "Throttle initial loading (batch ~8-12 frames at a time)",
+          "why": "Avoids the load-time decode storm so the very first scroll is smooth.",
+          "effort": "low"
+        }
+      ],
+      "expected_impact": "Solutions 1 + 2 eliminate the freeze; adding 3 + 4 takes it from 'fixed' to buttery/60fps on mobile.",
+      "verification": "Test on a real mid-tier Android phone (not just desktop devtools throttling). Watch for: no frame stick/snap during a fast fling scroll, and steady 60fps in the performance profiler with no long main-thread decode tasks."
+    },
+    {
+      "id": "MOBILE-002",
+      "title": "Risk of tab crash from decoded frame memory",
+      "severity": "critical",
+      "category": "performance",
+      "blocking": true,
+      "symptom": "On lower-memory phones the tab can reload or crash outright instead of just janking.",
+      "files": ["web/components/ScrollSequence.tsx:48-55"],
+      "root_cause": {
+        "name": "All 240 frames held decoded in memory",
+        "explanation": "Every frame is preloaded and kept decoded for the page lifetime. 1280x720 decodes to ~3.7 MB each, so 240 frames = ~880 MB resident bitmap. On-disk size (7.7 MB WebP) is misleading — the decoded footprint is what counts. Mobile browsers OOM-crash the tab around 300-400 MB."
+      },
+      "ordered_solutions": [
+        {
+          "priority": 1,
+          "fix": "Sliding-window decode — keep only ~20 frames decoded around the current index and release (close) the rest",
+          "why": "Caps resident memory to a small constant regardless of frame count.",
+          "effort": "medium"
+        },
+        {
+          "priority": 2,
+          "fix": "Ship a downscaled mobile frame set (e.g. 854x480) and/or halve the frame count to 120",
+          "why": "Cuts per-frame and total resident memory ~4x.",
+          "effort": "medium"
+        }
+      ],
+      "expected_impact": "Resident memory drops from ~880 MB to well under the mobile crash threshold; same fix that underpins MOBILE-001.",
+      "note": "MOBILE-001 (jank) and MOBILE-002 (crash) share the same root memory problem — solving the memory ceiling fixes both."
+    },
+    {
+      "id": "MOBILE-003",
+      "title": "Hero text and header not laid out for small screens",
+      "severity": "high",
+      "category": "responsive-ux",
+      "blocking": false,
+      "symptom": "On a phone the hero copy is cramped and the header is overcrowded.",
+      "files": [
+        "web/components/HeroText.tsx:15",
+        "web/components/Header.tsx:45-91"
+      ],
+      "root_cause": {
+        "name": "Desktop-only layout with no mobile breakpoint",
+        "explanation": "Hero copy sits in a min(680px, 48vw) column with side gradients — cramped on a ~390px phone. The header renders two nav groups plus a clamp(68px,7.5vw,112px) logo with no hamburger/collapse, so navigation crowds the top bar."
+      },
+      "ordered_solutions": [
+        {
+          "priority": 1,
+          "fix": "Collapse the header nav to a hamburger menu and shrink/reposition the logo below a mobile breakpoint",
+          "why": "Removes the crowded top bar and gives the hero room to breathe.",
+          "effort": "medium"
+        },
+        {
+          "priority": 2,
+          "fix": "Switch hero text to a full-width single-column layout with a bottom-anchored scrim on mobile",
+          "why": "Headline and support text become legible at small widths instead of squeezed into 48vw.",
+          "effort": "medium"
+        }
+      ],
+      "expected_impact": "Mobile hero reads as intentional and legible rather than a shrunken desktop layout."
+    }
+  ]
+}

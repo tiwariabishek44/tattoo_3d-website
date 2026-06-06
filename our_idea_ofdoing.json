@@ -1,0 +1,55 @@
+{
+  "project_goal": "Master 3D immersive asset creation for scroll-driven, Apple-style interactive websites using a video-to-frame workflow.",
+  "workflow_pipeline": {
+    "step_1_generation": "Create 3D immersive motion videos focusing on depth, lighting, and camera movement.",
+    "step_2_extraction": "Convert videos into sequential image frames (JPG/WebP) via tools like EZGIF or FFmpeg.",
+    "step_3_implementation": "Map scroll progress to a frame INDEX using useScroll + useTransform, then draw that frame to a <canvas> via a useMotionValueEvent('change') listener calling drawImage(). Note: useTransform alone animates DOM styles, not canvas frames, so the change-listener step is required."
+  },
+  "generation_tools": {
+    "primary": "Google Flow / Veo - fast iteration, strong for color, lighting, and camera-driven scenes.",
+    "fallbacks": [
+      "Seedance 2.0 - strongest temporal consistency; use when an object must stay identical frame-to-frame (assembly, exploded views).",
+      "Higgsfield - camera-control presets (orbit, dolly, crane) map directly onto the C/S-curve camera pillar."
+    ],
+    "blender_note": "Blender is NOT a forced graduation. Only fall back to it if scrub-testing reveals morphing that no AI model fixes. With correct prompts, AI video has handled exploded sequences in practice."
+  },
+  "technical_constraints": {
+    "optimal_frame_count": "100 to 150 frames per 5-second sequence to balance smooth animation with web performance.",
+    "target_file_formats": "WebP or highly optimized JPG to minimize initial asset load size and prevent scroll lag.",
+    "css_requirement": "Use 'position: sticky' on wrapper containers to lock the product in the viewport during scroll animation.",
+    "aspect_ratio": "Decide the web target ratio BEFORE generating (16:9 desktop hero, 9:16 mobile, or 1:1). AI tools output fixed ratios - choosing late means regenerating.",
+    "scrub_validation": "Never judge a clip by playback alone. Always scrub it slowly frame-by-frame; morphing invisible at 24fps can surface under manual scroll. This is the real pass/fail test."
+  },
+  "creative_pillars": {
+    "camera_movement": "Prioritize sweeping camera arcs (C or S curves) around the subject over static object spinning to maximize the illusion of 3D depth.",
+    "motion_pacing": "Maintain slow, deliberate, and smooth movements so the animation remains fluid when scrubbed manually by a user's scroll speed.",
+    "lighting_and_contrast": "Utilize studio lighting setups, rim lights, and soft dramatic shadows to establish physical presence and a premium texture feel.",
+    "composition": "Design for continuous flow without abrupt cuts, focusing on smooth transitions, floating elements, or modular product assemblies."
+  },
+  "learning_practice": {
+    "per_video_log": "For every video, record: the prompt used, which tool, what worked, and what failed. This log is where the creative eye actually compounds - without it, 50 videos is just 50 clips.",
+    "goal": "Build a transferable vocabulary (camera moves, depth, atmosphere, mood), not just a folder of renders."
+  },
+  "the_50_video_roadmap": [
+    {
+      "phase": "Videos 01-10",
+      "focus": "Basic Geometry & Physics",
+      "objectives": "Animate simple shapes (spheres, cubes) bouncing or sliding. Master studio lighting, reflections, and realistic gravity on basic surfaces."
+    },
+    {
+      "phase": "Videos 11-25",
+      "focus": "Camera & Perspective",
+      "objectives": "Introduce dynamic camera sweeps, viewpoints flying through objects, and orbital paths to practice environmental parallax."
+    },
+    {
+      "phase": "Videos 26-40",
+      "focus": "Color & Textures",
+      "objectives": "Experiment with high-end premium materials (brushed titanium, liquid chrome, matte finishes) and shifting light colors mid-motion."
+    },
+    {
+      "phase": "Videos 41-50",
+      "focus": "Concept Landing Pages",
+      "objectives": "Execute complex, multi-part interactive concepts like abstract product assembly or exploded views tailored for an immersive web experience."
+    }
+  ]
+}
