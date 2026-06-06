@@ -13,7 +13,7 @@
 // Assets: 3 jungle/animal stills in ROTATION across 6 slides. No auto-advance.
 import { useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { COLORS } from "@/lib/theme";
+import { SERIF, SANS, COLORS, GUTTER } from "@/lib/theme";
 
 const IMG = "/crousal_images2";
 
@@ -43,8 +43,8 @@ const txtLine = {
 
 type Slide = { img: string; accent: string; desc: string; place: string; sub: string };
 
-const EYEBROW = "Styles we master"; // section eyebrow
-const TITLE = "The art of"; // constant white headline; the service is the accent line
+const HEADING = "Our Service Offering"; // bold main heading (top)
+const TITLE = "The art of"; // per-service heading lead-in; the service is the accent line
 
 // Service slides — natural copy. Heading reads "The art of" + the service (gold
 // accent), with a real one-line description as the subheading.
@@ -191,7 +191,8 @@ export default function ServiceSlider() {
           display: "flex",
           flexDirection: "column",
           justifyContent: "center",
-          padding: compact ? "0 28px" : "0 clamp(48px, 7vw, 120px)",
+          // alignment DNA from the rest of the homepage (shared GUTTER rail)
+          padding: `0 ${GUTTER}`,
         }}
       >
           {/* slogan/text — fades in LINE BY LINE through the bar's last ~45%
@@ -204,34 +205,33 @@ export default function ServiceSlider() {
               initial="hidden"
               animate="show"
               exit="exit"
-              style={{ maxWidth: compact ? "100%" : "52%" }}
+              style={{ maxWidth: compact ? "100%" : "min(760px, 64%)" }}
             >
+              {/* main heading — hero typography DNA (matches machine scroll sequence) */}
               <motion.div
                 variants={txtLine}
                 style={{
-                  fontFamily: "var(--font-inter), sans-serif",
-                  textTransform: "uppercase",
-                  letterSpacing: "0.3em",
-                  fontSize: "0.8rem",
-                  fontWeight: 600,
-                  color: "#fff",
-                  marginBottom: "1rem",
-                  paddingLeft: 4,
+                  fontFamily: SERIF,
+                  fontWeight: 500,
+                  fontSize: "clamp(3.2rem, 7vw, 8rem)",
+                  lineHeight: 1.02,
+                  color: COLORS.gold,
+                  marginBottom: "1.4rem",
+                  textShadow: "0 2px 30px rgba(0,0,0,0.6)",
                 }}
               >
-                {EYEBROW}
+                {HEADING}
               </motion.div>
               <motion.h1
                 variants={txtLine}
                 style={{
-                  fontFamily: "var(--font-inter), sans-serif",
-                  fontWeight: 800,
-                  fontSize: "clamp(2.6rem, 6.2vw, 5.6rem)",
-                  lineHeight: 0.98,
-                  letterSpacing: "-0.01em",
-                  color: "#fff",
+                  fontFamily: SERIF,
+                  fontWeight: 500,
+                  fontSize: "clamp(1.4rem, 2.6vw, 2.3rem)",
+                  lineHeight: 1.1,
+                  color: COLORS.offWhite,
                   margin: 0,
-                  textTransform: "uppercase",
+                  textShadow: "0 1px 16px rgba(0,0,0,0.4)",
                 }}
               >
                 {TITLE}
@@ -239,14 +239,13 @@ export default function ServiceSlider() {
               <motion.div
                 variants={txtLine}
                 style={{
-                  fontFamily: "var(--font-inter), sans-serif",
-                  fontWeight: 800,
-                  fontSize: "clamp(2.6rem, 6.2vw, 5.6rem)",
-                  lineHeight: 0.98,
-                  letterSpacing: "-0.01em",
+                  fontFamily: SERIF,
+                  fontWeight: 500,
+                  fontSize: "clamp(1.4rem, 2.6vw, 2.3rem)",
+                  lineHeight: 1.1,
                   color: ACCENT,
                   margin: 0,
-                  textTransform: "uppercase",
+                  textShadow: "0 1px 16px rgba(0,0,0,0.4)",
                 }}
               >
                 {s.accent}
@@ -254,12 +253,12 @@ export default function ServiceSlider() {
               <motion.p
                 variants={txtLine}
                 style={{
-                  fontFamily: "var(--font-inter), sans-serif",
-                  fontSize: "clamp(0.92rem, 1.1vw, 1.05rem)",
+                  fontFamily: SANS,
+                  fontSize: "clamp(1.05rem, 1.4vw, 1.2rem)",
                   lineHeight: 1.7,
-                  color: "rgba(255,255,255,0.72)",
-                  margin: "1.6rem 0 2.2rem",
-                  maxWidth: 560,
+                  color: COLORS.muted,
+                  margin: "1.5rem 0 2.2rem",
+                  maxWidth: "52ch",
                 }}
               >
                 {s.desc}

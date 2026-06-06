@@ -350,7 +350,7 @@ export default function GalleryPinterest({
               style={{
                 position: "absolute",
                 inset: 0,
-                background: "rgba(0,0,0,0.42)",
+                background: "rgba(0,0,0,0.68)",
                 pointerEvents: "none",
                 zIndex: 0,
               }}
