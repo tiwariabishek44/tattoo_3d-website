@@ -1,4 +1,5 @@
 import Header from "@/components/Header";
+import MobileRedirect from "@/components/MobileRedirect";
 import ScrollSequence from "@/components/ScrollSequence";
 import SpiderSequence from "@/components/SpiderSequence";
 import BrandStatement from "@/components/BrandStatement";
@@ -15,6 +16,7 @@ import BookButton from "@/components/BookButton";
 export default function Home() {
   return (
     <main>
+      <MobileRedirect />
       <Header />
       <ScrollSequence />
       <BrandStatement />
