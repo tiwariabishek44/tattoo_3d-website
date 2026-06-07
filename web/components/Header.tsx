@@ -10,7 +10,7 @@ const NAV: { label: string; href: string }[] = [
   { label: "After Care", href: "#" },
   { label: "Gallery", href: "#" },
   { label: "Design 2", href: "/design-2" },
-  { label: "Concept 3", href: "/concept-3" },
+  { label: "Studio Tour", href: "/concept-3" },
   { label: "Contact", href: "#" },
 ];
 

@@ -11,9 +11,9 @@ import { FrameEngine, EngineConfig } from "@/lib/frameEngine";
 
 const FRAME_COUNT = 240;
 const PAD = 6;
-const SMOOTHING = 0.12;
+const SMOOTHING = 0.14;
 const LEGS = 2; // R→L→R
-const VH_PER_LEG = 400;
+const VH_PER_LEG = 260;
 const OVERLAY_OPACITY = 0.05;
 const WINDOW = 30;
 const RELEASE_BUFFER = 14;

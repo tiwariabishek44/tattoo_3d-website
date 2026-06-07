@@ -19,10 +19,10 @@ const SEGMENTS = [
   // on disk, just unused. The SCRUB_END tail then holds on the reveal.
   { base: "/frames-beat1", count: 185 }, // frames 1 → 185 (of 240 on disk)
 ];
-const VH_TOTAL = 1400; // scroll length (1080 → 1400 = noticeably slower scrub, 240 frames)
+const VH_TOTAL = 850; // tuned for industry-standard scroll speed (device at 0.0)
 const SCRUB_END = 0.82; // frames complete here; the tail holds on the reveal
 const PAD = 6;
-const SMOOTHING = 0.12;
+const SMOOTHING = 0.14;
 const WINDOW = 30;
 const RELEASE_BUFFER = 14;
 const READY_AHEAD = 12;
