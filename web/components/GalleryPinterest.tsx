@@ -1,12 +1,26 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { SERIF, SANS } from "@/lib/theme";
 
 // Pinterest-pattern gallery: clean full-bleed dense masonry, hover-darken overlay
 // (no red Save button), click → lightbox. Theme-aware (light = neutral white,
 // dark = on-brand black) so both can be compared with the SAME layout.
+
+// ── Entry gate (Services → Gallery transition) ────────────
+// Slows the landing into the gallery when arriving with scroll momentum
+// from the Services section above — same escape-velocity mechanism used
+// at the other section joints, one direction only (downward entry).
+const GATE_VEL_LOW  = 1.5;   // px/ms — below: gentle scroll, no gate needed
+const GATE_VEL_HIGH = 8.0;   // px/ms — above: deliberate fast scroll → governed glide (see below)
+const HOLD_MS       = 1300;  // ms — entry hold (shorter: gallery is long, just ease the landing)
+const VEL_DECAY_MS  = 200;   // ms — treat velocity as 0 if no recent wheel event
+const IO_THRESHOLD  = 0.05;  // fire as soon as the gallery top edge appears
+const GOVERN_MAX_DELTA = 32; // px per wheel tick — extreme-velocity clamp: keeps the
+                             // page moving (never frozen) but slow enough that the
+                             // section is actually rendered/seen, not blown past in a blink
+// ─────────────────────────────────────────────────────────
 
 const G = "/crousls_images";
 const POOL = [
@@ -94,6 +108,93 @@ export default function GalleryPinterest({
   const filtered =
     active === "All" ? ITEMS : ITEMS.filter((i) => i.cat === active);
 
+  // ── Entry gate refs ───────────────────────────────────
+  const sectionRef     = useRef<HTMLElement>(null);
+  const velRef         = useRef(0);
+  const lastWheelTsRef = useRef(0);
+  const gateActiveRef  = useRef(false);
+  const gateTimerRef   = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const gateListenerRef = useRef<((e: WheelEvent) => void) | null>(null);
+  // ─────────────────────────────────────────────────────
+
+  useEffect(() => {
+    const releaseGate = () => {
+      if (!gateActiveRef.current) return;
+      gateActiveRef.current = false;
+      if (gateTimerRef.current) { clearTimeout(gateTimerRef.current); gateTimerRef.current = null; }
+      if (gateListenerRef.current) {
+        document.removeEventListener("wheel", gateListenerRef.current);
+        gateListenerRef.current = null;
+      }
+    };
+
+    const fireGate = () => {
+      if (gateActiveRef.current) return;
+      gateActiveRef.current = true;
+      let lastTs = performance.now();
+
+      const listener = (e: WheelEvent) => {
+        if (e.deltaY <= 0) { releaseGate(); return; } // upward scroll — release immediately
+        const now = performance.now();
+        const dt = now - lastTs; lastTs = now;
+        const vel = dt > 0 && dt < VEL_DECAY_MS * 2 ? Math.abs(e.deltaY) / dt : 0;
+        e.preventDefault();
+        if (vel >= GATE_VEL_HIGH) {
+          // governed glide — a hard fling shouldn't blow the landing past in
+          // a blink. Keep the page moving (don't freeze it), just clamp the
+          // per-tick distance so the entry is actually seen.
+          window.scrollBy({ top: Math.min(e.deltaY, GOVERN_MAX_DELTA), left: 0 });
+        }
+        // else: pure hold — within the lock zone, freeze in place
+      };
+
+      gateListenerRef.current = listener;
+      document.addEventListener("wheel", listener, { passive: false });
+      gateTimerRef.current = setTimeout(releaseGate, HOLD_MS);
+    };
+
+    const trackVel = (e: WheelEvent) => {
+      const now = performance.now();
+      const dt  = now - lastWheelTsRef.current;
+      velRef.current = dt > 0 && dt < VEL_DECAY_MS * 2 ? Math.abs(e.deltaY) / dt : 0;
+      lastWheelTsRef.current = now;
+    };
+    window.addEventListener("wheel", trackVel, { passive: true });
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          if (!entry.isIntersecting) continue;
+          const timeSinceWheel = performance.now() - lastWheelTsRef.current;
+          const vel = timeSinceWheel < VEL_DECAY_MS ? velRef.current : 0;
+          const reduced = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches ?? false;
+          const isMobile = window.innerWidth < 820;
+          if (reduced || isMobile) continue;
+          if (vel < GATE_VEL_LOW) continue; // gentle scroll — no gate needed
+          // NOTE: extreme velocity (>= GATE_VEL_HIGH) ALSO fires the gate now —
+          // the listener above switches to governed-glide mode for it, instead
+          // of letting a hard fling blow the landing past in a blink.
+          fireGate();
+        }
+      },
+      { threshold: IO_THRESHOLD }
+    );
+
+    if (sectionRef.current) observer.observe(sectionRef.current);
+
+    const onVisibilityChange = () => {
+      if (document.hidden) releaseGate();
+    };
+    document.addEventListener("visibilitychange", onVisibilityChange);
+
+    return () => {
+      window.removeEventListener("wheel", trackVel);
+      document.removeEventListener("visibilitychange", onVisibilityChange);
+      observer.disconnect();
+      releaseGate();
+    };
+  }, []);
+
   useEffect(() => {
     if (box === null) return;
     const onKey = (e: KeyboardEvent) => {
@@ -118,6 +219,7 @@ export default function GalleryPinterest({
 
   return (
     <section
+      ref={sectionRef}
       style={{
         background: t.bg,
         padding: "clamp(48px, 7vh, 96px) clamp(12px, 1.5vw, 20px)",

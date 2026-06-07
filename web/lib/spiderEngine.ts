@@ -120,7 +120,9 @@ export class SpiderEngine {
         if (f) fRelease(f);
         return;
       }
-      if (Math.abs(i - this.center) <= this.cfg.window + this.cfg.releaseBuffer) {
+      const cur = Math.round(this.current);
+      const zone = this.cfg.window + this.cfg.releaseBuffer;
+      if (Math.abs(i - this.center) <= zone || Math.abs(i - cur) <= zone) {
         this.frames[i] = f;
         this.loaded++;
         this.cb.onProgress(this.loaded);
@@ -156,8 +158,9 @@ export class SpiderEngine {
     const lo = Math.max(0, center - W);
     const hi = Math.min(N - 1, center + W);
     for (let i = lo; i <= hi; i++) this.loadFrame(i);
-    const kLo = Math.max(0, center - W - B);
-    const kHi = Math.min(N - 1, center + W + B);
+    const cur = Math.round(this.current);
+    const kLo = Math.min(Math.max(0, center - W - B), Math.max(0, cur - W - B));
+    const kHi = Math.max(Math.min(N - 1, center + W + B), Math.min(N - 1, cur + W + B));
     for (let i = 0; i < N; i++) {
       if ((i < kLo || i > kHi) && this.frames[i]) {
         fRelease(this.frames[i]!);

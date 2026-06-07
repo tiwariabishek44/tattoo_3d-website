@@ -5,8 +5,7 @@ import SpiderSequence from "@/components/SpiderSequence";
 import BrandStatement from "@/components/BrandStatement";
 import ServiceSlider from "@/components/ServiceSlider";
 import GalleryPinterest from "@/components/GalleryPinterest";
-import Artists from "@/components/Artists";
-import Process from "@/components/Process";
+import ArtistShowcaseSlider from "@/components/ArtistShowcaseSlider";
 import Testimonials from "@/components/Testimonials";
 import BookingCTA from "@/components/BookingCTA";
 import Footer from "@/components/Footer";
@@ -27,8 +26,7 @@ export default function Home() {
       <ServiceSlider />
       {/* Gallery — light/Pinterest skin (dark version retired). */}
       <GalleryPinterest theme="light" />
-      <Artists />
-      <Process />
+      <ArtistShowcaseSlider />
       <Testimonials />
       <BookingCTA />
       <Footer />

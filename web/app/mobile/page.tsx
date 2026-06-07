@@ -5,7 +5,6 @@ import StatsBand from "@/components/StatsBand";
 import StylesCarousel from "@/components/StylesCarousel";
 import ParallaxSection from "@/components/ParallaxSection";
 import Artists from "@/components/Artists";
-import Process from "@/components/Process";
 import Testimonials from "@/components/Testimonials";
 import BookingCTA from "@/components/BookingCTA";
 import Footer from "@/components/Footer";
@@ -23,7 +22,6 @@ export default function MobileHome() {
       <StylesCarousel ambient />
       <ParallaxSection />
       <Artists />
-      <Process />
       <Testimonials />
       <BookingCTA />
       <Footer />

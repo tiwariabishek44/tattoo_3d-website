@@ -11,6 +11,8 @@ const NAV: { label: string; href: string }[] = [
   { label: "Gallery", href: "#" },
   { label: "Design 2", href: "/design-2" },
   { label: "Studio Tour", href: "/concept-3" },
+  { label: "Concept 4", href: "/concept-4" },
+  { label: "Concept 5", href: "/concept-5" },
   { label: "Contact", href: "#" },
 ];
 
@@ -70,13 +72,12 @@ export default function Header() {
           : "linear-gradient(to bottom, rgba(0,0,0,0.5), rgba(0,0,0,0))",
         backdropFilter: frosted ? "blur(14px)" : "none",
         WebkitBackdropFilter: frosted ? "blur(14px)" : "none",
-        borderBottom: frosted
-          ? "1px solid rgba(203,164,90,0.16)"
-          : "1px solid transparent",
-        // stay shown over a transparent-header section (don't auto-hide there)
-        transform: hidden && !overImage ? "translateY(-100%)" : "translateY(0)",
+        borderBottom: "none",
+        // hide/show on scroll direction everywhere — consistent across all sections
+        // (overImage only changes the visual style: gradient vs. frosted bar)
+        transform: hidden ? "translateY(-100%)" : "translateY(0)",
         transition:
-          "transform 0.35s ease, background 0.35s ease, backdrop-filter 0.35s ease, padding 0.35s ease, border-color 0.35s ease",
+          "transform 0.35s ease, background 0.35s ease, backdrop-filter 0.35s ease, padding 0.35s ease",
         pointerEvents: "none",
       }}
     >

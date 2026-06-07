@@ -33,7 +33,7 @@ const BEATS: Beat[] = [
     support:
       "A tattoo outlives the moment it's made. We treat every one exactly that way — considered, deliberate, built to last a lifetime.",
     side: "left",
-    window: [0, 0.05, 0.13, 0.22],
+    window: [0, 0.05, 0.14, 0.24],
     startVisible: true,
   },
   {
@@ -42,7 +42,7 @@ const BEATS: Beat[] = [
     support:
       "From the first stencil to the final pass, nothing is rushed — clean lines, steady hands, an obsession with the millimetre.",
     side: "right",
-    window: [0.28, 0.44, 0.56, 0.64],
+    window: [0.26, 0.44, 0.57, 0.66],
   },
   {
     eyebrow: "THE CRAFT",
@@ -50,7 +50,7 @@ const BEATS: Beat[] = [
     support:
       "Our artists don't print — they compose. Each piece is designed for you, your story, and the way it lives on your skin.",
     side: "left",
-    window: [0.8, 0.9, 1, 1],
+    window: [0.79, 0.9, 1, 1],
     persist: true,
   },
 ];

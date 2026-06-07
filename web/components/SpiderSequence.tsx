@@ -17,21 +17,22 @@ import { SpiderEngine, SpiderConfig } from "@/lib/spiderEngine";
 const SEGMENTS = [
   // frames 186–240 are near-identical (held reveal) → cap at 185; the rest stay
   // on disk, just unused. The SCRUB_END tail then holds on the reveal.
-  { base: "/frames-beat1", count: 185 }, // frames 1 → 185 (of 240 on disk)
+  { base: "/frames-beat1", start: 77, count: 109 }, // frames 77 → 185 (cut dead preamble)
 ];
-const VH_TOTAL = 850; // tuned for industry-standard scroll speed (device at 0.0)
+const VH_TOTAL = 1020; // tuned for industry-standard scroll speed (device at 0.0)
 const SCRUB_END = 0.82; // frames complete here; the tail holds on the reveal
 const PAD = 6;
 const SMOOTHING = 0.14;
 const WINDOW = 30;
 const RELEASE_BUFFER = 14;
 const READY_AHEAD = 12;
+const UNLOCK_SCROLL_DELTA = 0.06; // progress user must scroll after first frame before sequence starts
 const MOBILE_FIT = 1.04;
 const ENSURE_STEP = 4;
 // reveal-zoom: open tight on the zipper pull, ease back to full frame by REVEAL_END,
 // then hold. The ONLY camera motion (breathing removed).
-const REVEAL_ZOOM = 2.2; // desktop opening magnification
-const REVEAL_ZOOM_MOBILE = 1.5; // gentler on small screens (sharper on lighter frames)
+const REVEAL_ZOOM = 1.55; // desktop opening magnification
+const REVEAL_ZOOM_MOBILE = 1.3; // gentler on small screens (sharper on lighter frames)
 const FOCAL_START = { x: 0.5, y: 0.2 }; // the zipper pull (top-centre)
 // Stepped pull-back: e = how far out we've pulled (0 = full close-up, 1 = full frame).
 // Flat segments = HOLD (zip keeps descending while the camera waits); rising = ease-out.
@@ -67,12 +68,37 @@ export default function SpiderSequence({
   const [ready, setReady] = useState(false);
   const [loaded, setLoaded] = useState(0);
 
+  // Scroll gate: sequence doesn't start until frame 77 fills screen AND
+  // user has deliberately scrolled UNLOCK_SCROLL_DELTA progress units past it
+  const seqUnlockedRef   = useRef(false);
+  const readyRef         = useRef(false);  // mirrors ready state without render lag
+  const readyProgressRef = useRef(-1);     // progress snapshotted when ready first fired
+
+  // Mirror ready into a ref so the scroll handler always sees the live value
+  useEffect(() => {
+    if (ready) readyRef.current = true;
+  }, [ready]);
+
   const { scrollYProgress } = useScroll({
     target: containerRef,
     offset: ["start start", "end end"],
   });
 
   useMotionValueEvent(scrollYProgress, "change", (p) => {
+    // Snapshot progress at the first scroll event after ready fires
+    if (readyRef.current && readyProgressRef.current < 0) {
+      readyProgressRef.current = p;
+    }
+
+    // Unlock once user has scrolled UNLOCK_SCROLL_DELTA past the ready snapshot
+    if (!seqUnlockedRef.current) {
+      if (readyProgressRef.current >= 0 && p - readyProgressRef.current >= UNLOCK_SCROLL_DELTA) {
+        seqUnlockedRef.current = true;
+      } else {
+        return;
+      }
+    }
+
     // remap so the scrub finishes by SCRUB_END, then holds on the reveal
     engineRef.current?.setProgress(Math.min(p / SCRUB_END, 1));
   });
@@ -178,7 +204,7 @@ export default function SpiderSequence({
                 top: 0,
                 left: 0,
                 right: 0,
-                height: "10vh",
+                height: "4vh",
                 background: `linear-gradient(to bottom, ${INK} 0%, rgba(7,6,5,0) 100%)`,
                 pointerEvents: "none",
               }}

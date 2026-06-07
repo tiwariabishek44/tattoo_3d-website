@@ -79,7 +79,12 @@ export class FrameEngine {
         if (f) fRelease(f);
         return;
       }
-      if (Math.abs(i - this.center) <= this.cfg.window + this.cfg.releaseBuffer) {
+      // Keep the frame if it's near the target window OR near what is currently
+      // being displayed. During velocity cap the two can be far apart — without
+      // this check, arriving frames for the active zone get discarded.
+      const cur = Math.round(this.current);
+      const zone = this.cfg.window + this.cfg.releaseBuffer;
+      if (Math.abs(i - this.center) <= zone || Math.abs(i - cur) <= zone) {
         this.frames[i] = f;
         this.loaded++;
         this.cb.onProgress(this.loaded);
@@ -114,8 +119,12 @@ export class FrameEngine {
     const lo = Math.max(0, center - W);
     const hi = Math.min(N - 1, center + W);
     for (let i = lo; i <= hi; i++) this.loadFrame(i);
-    const kLo = Math.max(0, center - W - B);
-    const kHi = Math.min(N - 1, center + W + B);
+    // Release zone covers both the target center (look-ahead) AND the current
+    // playback position. During velocity cap these diverge; protecting both
+    // prevents the buffer from evicting frames that are actively being played.
+    const cur = Math.round(this.current);
+    const kLo = Math.min(Math.max(0, center - W - B), Math.max(0, cur - W - B));
+    const kHi = Math.max(Math.min(N - 1, center + W + B), Math.min(N - 1, cur + W + B));
     for (let i = 0; i < N; i++) {
       if ((i < kLo || i > kHi) && this.frames[i]) {
         fRelease(this.frames[i]!);
@@ -188,6 +197,10 @@ export class FrameEngine {
     }
     this.rafId = RAF(this.tick);
   };
+
+  getFrame(): number {
+    return Math.round(this.current);
+  }
 
   private kick() {
     if (!this.rafId && !this.dead) this.rafId = RAF(this.tick);
