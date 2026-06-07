@@ -243,7 +243,7 @@ export default function ArtistShowcaseSlider() {
               fontWeight: 500,
               fontSize: "clamp(3.2rem, 7vw, 8rem)",
               lineHeight: 1.02,
-              color: COLORS.gold,
+              color: COLORS.offWhite,
               marginBottom: "1.4rem",
               textShadow: "0 2px 30px rgba(0,0,0,0.6)",
             }}
@@ -274,7 +274,7 @@ export default function ArtistShowcaseSlider() {
               fontWeight: 600,
               letterSpacing: "0.22em",
               textTransform: "uppercase",
-              color: COLORS.gold,
+              color: "rgba(255,255,255,0.78)",
               marginTop: "0.6rem",
             }}
           >
@@ -345,12 +345,12 @@ export default function ArtistShowcaseSlider() {
                 overflow: "hidden",
                 cursor: "pointer",
                 padding: 0,
-                border: isActive ? `3px solid ${COLORS.gold}` : "1px solid rgba(255,255,255,0.4)",
+                border: "3px solid rgba(255,255,255,0.7)",
                 backgroundImage: `url(${t.img})`,
                 backgroundSize: "cover",
                 backgroundPosition: "center",
                 boxShadow: isActive
-                  ? "0 24px 60px rgba(0,0,0,0.55), 0 0 0 1px rgba(203,164,90,0.35)"
+                  ? "0 24px 60px rgba(0,0,0,0.55), 0 0 0 1px rgba(255,255,255,0.3)"
                   : "0 20px 50px rgba(0,0,0,0.45)",
               }}
             >
@@ -408,7 +408,7 @@ export default function ArtistShowcaseSlider() {
                 <div
                   style={{
                     fontFamily: SANS,
-                    color: isActive ? COLORS.gold : "rgba(255,255,255,0.62)",
+                    color: isActive ? "#fff" : "rgba(255,255,255,0.62)",
                     fontSize: compact ? "0.64rem" : "0.74rem",
                     marginTop: 4,
                     textTransform: "uppercase",
