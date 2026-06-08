@@ -493,7 +493,8 @@ export default function ArtistShowcaseSlider() {
                 style={{
                   position: "relative",
                   zIndex: 305,
-                  width: "min(1540px, 98vw)",
+                  width: "100%",
+                  maxWidth: 1540,
                   height: compact ? "auto" : "min(980px, 94vh)",
                   maxHeight: "94vh",
                   display: "flex",
