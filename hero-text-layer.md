@@ -1,7 +1,7 @@
 # Hero Text & Depth Layer — Plan (Single Source of Truth)
 
 > The slogan / brand-story layer on top of the scroll-scrub machine hero for
-> **Teyung Tattoo Ink**. Vibe: **premium**. Built in the Next/TS app ([web/](web/)).
+> **Abishek Tattoo Ink**. Vibe: **premium**. Built in the Next/TS app ([web/](web/)).
 >
 > **Parent project:** [tattoo-studio-hero.md](tattoo-studio-hero.md) ·
 > **Web delivery:** [frame-sequence-stack.md](frame-sequence-stack.md)
@@ -34,7 +34,7 @@ Each beat = **eyebrow → headline → 2–3 supporting lines**. Text sits **opp
 | 4 | 88–100% | left | **right** |
 
 **Beat 1**
-- Eyebrow: `TEYUNG TATTOO INK`
+- Eyebrow: `Abishek TATTOO INK`
 - Headline: **Permanence is a craft.**
 - Support: A tattoo outlives the moment it's made. We treat every one exactly that way — considered, deliberate, built to last a lifetime.
 
@@ -49,7 +49,7 @@ Each beat = **eyebrow → headline → 2–3 supporting lines**. Text sits **opp
 - Support: Our artists don't print — they compose. Each piece is designed for you, your story, and the way it lives on your skin.
 
 **Beat 4 (CTA)**
-- Eyebrow: `TEYUNG TATTOO INK`
+- Eyebrow: `Abishek TATTOO INK`
 - Headline: **Begin your mark.**
 - Support: Book a consultation and let's design something unmistakably yours.
 - Button: `Book a session`
@@ -88,7 +88,7 @@ Each beat = **eyebrow → headline → 2–3 supporting lines**. Text sits **opp
 
 ## Extras (polish)
 - **Scroll hint** — bottom-centre `SCROLL` + chevron at load; fades out once `scrollYProgress > ~0.02`.
-- **Fixed wordmark** — small `TEYUNG` top-left, persistent branding.
+- **Fixed wordmark** — small `Abishek` top-left, persistent branding.
 - **Responsive** — `clamp()` sizing; on mobile, text centres/stacks, gradient becomes bottom-up, measure narrows.
 - **Accessibility** — real HTML text (not canvas), contrast guaranteed by the gradient.
 - **Restraint guardrail** — the machine is the hero; text supports, never competes.
@@ -105,4 +105,4 @@ Each beat = **eyebrow → headline → 2–3 supporting lines**. Text sits **opp
 - [ ] Final real copy from the studio (placeholder-premium for now).
 
 ## Changelog
-- **v1.0 (2026-06-05)** — Initial plan. Studio = Teyung Tattoo Ink, premium vibe. 4-beat hierarchy copy (eyebrow/headline/support/CTA), Cormorant + Inter typography, cool palette + brass CTA, depth via localized gradient + parallax + wash, per-beat fade-in/out, scroll hint + wordmark + responsive.
+- **v1.0 (2026-06-05)** — Initial plan. Studio = Abishek Tattoo Ink, premium vibe. 4-beat hierarchy copy (eyebrow/headline/support/CTA), Cormorant + Inter typography, cool palette + brass CTA, depth via localized gradient + parallax + wash, per-beat fade-in/out, scroll hint + wordmark + responsive.

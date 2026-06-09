@@ -219,10 +219,12 @@ export default function GalleryPinterest({
 
   return (
     <section
+      id="gallery"
       ref={sectionRef}
       style={{
         background: t.bg,
         padding: "clamp(48px, 7vh, 96px) clamp(12px, 1.5vw, 20px)",
+        scrollMarginTop: "90px",
       }}
     >
       {/* heading — bigger + bold */}
@@ -261,7 +263,7 @@ export default function GalleryPinterest({
           maxWidth: "54ch",
         }}
       >
-        Real pieces, real skin — straight from the Teyung chair.
+        Real pieces, real skin — straight from the Abishek chair.
       </p>
 
       {/* filter row — neutral chips */}

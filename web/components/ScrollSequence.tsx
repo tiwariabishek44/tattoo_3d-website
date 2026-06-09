@@ -97,7 +97,15 @@ export default function ScrollSequence() {
     };
 
     const engine = new FrameEngine(canvas, ctx, cfg, {
-      onReady: () => setReady(true),
+      onReady: () => {
+        setReady(true);
+        // Signal the entry curtain (A2) that the hero has painted its first
+        // frames — it holds on ink-black until this fires, then dissolves onto
+        // a ready hero (never onto a loading panel). Flag + event so a curtain
+        // that mounts late can't miss the moment.
+        (window as typeof window & { __heroReady?: boolean }).__heroReady = true;
+        window.dispatchEvent(new Event("hero:ready"));
+      },
       onProgress: (n) => setLoaded(n),
     });
     engineRef.current = engine;
@@ -130,6 +138,8 @@ export default function ScrollSequence() {
 
   return (
     <div
+      id="top"
+      data-cursor="scrub"
       ref={containerRef}
       style={{ height: `${LEGS * VH_PER_LEG}vh`, position: "relative" }}
     >
@@ -164,24 +174,42 @@ export default function ScrollSequence() {
         />
         <HeroFx />
         <HeroText progress={scrollYProgress} />
-        {!ready && (
-          <div
-            style={{
-              position: "absolute",
-              inset: 0,
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              background: "#000",
-              color: "#666",
-              fontFamily: "system-ui, sans-serif",
-              fontSize: 14,
-              letterSpacing: "0.1em",
-            }}
-          >
-            LOADING {Math.min(100, Math.round((loaded / READY_AHEAD) * 100))}%
-          </div>
-        )}
+        {/* A2b — first-frame poster seals the canvas warm-up. Shows the REAL
+            first frame (not a bare #070605 / "LOADING" panel) while the engine
+            loads, then fades out the instant it has painted — the live canvas
+            underneath is already on the same frame, so the hand-off is invisible. */}
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          aria-hidden
+          src="/frames/frame_000001.webp"
+          style={{
+            position: "absolute",
+            inset: 0,
+            width: "100%",
+            height: "100%",
+            objectFit: "cover",
+            opacity: ready ? 0 : 1,
+            transition: "opacity 0.6s ease",
+            pointerEvents: "none",
+            zIndex: 2,
+          }}
+        />
+        {/* quiet gold load-line — the only progress feedback, under the poster */}
+        <div
+          aria-hidden
+          style={{
+            position: "absolute",
+            left: 0,
+            bottom: 0,
+            height: 2,
+            width: `${Math.min(100, Math.round((loaded / READY_AHEAD) * 100))}%`,
+            background: "#CBA45A",
+            opacity: ready ? 0 : 0.85,
+            transition: "opacity 0.5s ease, width 0.3s ease",
+            pointerEvents: "none",
+            zIndex: 3,
+          }}
+        />
       </div>
     </div>
   );

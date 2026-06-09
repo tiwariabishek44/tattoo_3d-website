@@ -4,6 +4,19 @@
   box-sizing: border-box;
 }
 
+html {
+  /* Smooth-scroll for in-page nav anchors. Only affects programmatic / hash /
+     keyboard scrolling — wheel scrubbing (the scroll-scrub sections + their
+     escape-velocity gates) is untouched, since those listen to raw wheel events. */
+  scroll-behavior: smooth;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+}
+
 html,
 body {
   background: #070605;
@@ -15,7 +28,63 @@ canvas {
   background: #070605;
 }
 
+/* A3 — custom cursor. Hide the native arrow only when the JS cursor is active
+   (class added on mount, removed on cleanup / never added on touch). */
+.has-custom-cursor,
+.has-custom-cursor * {
+  cursor: none !important;
+}
+
+.cursor-ring,
+.cursor-dot {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 10000;
+  pointer-events: none;
+  opacity: 0;
+  will-change: transform, opacity;
+}
+.cursor-ring {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  border: 1.5px solid rgba(242, 239, 233, 0.7);
+  background: transparent;
+  transition: width 0.25s ease, height 0.25s ease, border-color 0.25s ease,
+    background-color 0.25s ease, opacity 0.3s ease;
+}
+.cursor-dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: #f2efe9;
+  transition: background-color 0.25s ease, opacity 0.3s ease;
+}
+/* over interactive elements → gold, enlarged */
+.cursor-ring[data-state="link"] {
+  width: 52px;
+  height: 52px;
+  border-color: #cba45a;
+  background: rgba(203, 164, 90, 0.12);
+}
+.cursor-dot[data-state="link"] {
+  background: #cba45a;
+}
+/* over scroll-scrub sections → wider gold "drag/scroll here" ring */
+.cursor-ring[data-state="scrub"] {
+  width: 66px;
+  height: 66px;
+  border-color: rgba(203, 164, 90, 0.85);
+}
+/* press feedback (size, since transform is owned by JS positioning) */
+.cursor-ring[data-pressed="1"] {
+  width: 26px;
+  height: 26px;
+}
+
 .nav-link {
+  position: relative;
   font-family: var(--font-inter), system-ui, sans-serif;
   color: #cba45a;
   text-decoration: none;
@@ -26,6 +95,35 @@ canvas {
   white-space: nowrap;
   transition: color 0.25s ease;
 }
+/* B1 — gold underline wipes in from the left on hover and stays for the
+   active section. One hover signature, reused on every link. */
+.nav-link::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -5px;
+  height: 1px;
+  background: #cba45a;
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.28s ease;
+}
 .nav-link:hover {
   color: #f2efe9;
+}
+.nav-link:hover::after,
+.nav-link[data-active="true"]::after {
+  transform: scaleX(1);
+}
+.nav-link[data-active="true"] {
+  color: #f2efe9;
+}
+
+/* B9 — footer links answer the pointer (gold on hover). */
+.footer-link {
+  transition: color 0.25s ease;
+}
+.footer-link:hover {
+  color: #cba45a !important;
 }

@@ -13,7 +13,7 @@
 //   - Hero copy stays voice-led: their own first-person line, carried over
 //     from the homepage Artists cards, not generic service blurb.
 import { useEffect, useRef, useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, LayoutGroup } from "framer-motion";
 import { SERIF, SANS, COLORS } from "@/lib/theme";
 
 const STUDIO_IMG = "/studio_interior_2.jpg";
@@ -47,15 +47,17 @@ const DUMMY_PORTFOLIO = [
   "/crousal_images2/black_work_tattoo1.jpeg",
 ];
 
-// Voice + card images carried straight over from the homepage Artists section
+// Voice carried straight over from the homepage Artists section
 // (ARTISTS_SOUL_PLAN.md) — same people, same words, different stage.
+// Real portraits now live in /public/artist_image/ — no more tattoo-work
+// stand-ins for the people themselves.
 const ARTISTS: Artist[] = [
   {
-    img: "/crousal_images2/realism_tattoo1.jpeg",
+    img: "/artist_image/artist1.jpg",
     name: "Tenzin",
     craft: "Fine line & custom",
     quote: "Fine lines, told slowly — like a sentence worth finishing properly.",
-    bio: "Trained across Kathmandu and Bangkok before settling into the Teyung chair, Tenzin works at a deliberately unhurried pace — a single-needle hand built for clients who want one piece told exactly right, not three told quickly.",
+    bio: "Trained across Kathmandu and Bangkok before settling into the Abishek chair, Tenzin works at a deliberately unhurried pace — a single-needle hand built for clients who want one piece told exactly right, not three told quickly.",
     stats: [
       { value: "9+ Yrs", label: "Experience" },
       { value: "650+", label: "Happy clients" },
@@ -64,7 +66,7 @@ const ARTISTS: Artist[] = [
     portfolio: DUMMY_PORTFOLIO,
   },
   {
-    img: "/crousal_images2/covere-up-tattoo-13.png",
+    img: "/artist_image/artist4.jpg",
     name: "Maya",
     craft: "Realism & cover-up",
     quote: "I turn scars into stories — that trade is the whole reason I do this.",
@@ -77,11 +79,11 @@ const ARTISTS: Artist[] = [
     portfolio: DUMMY_PORTFOLIO,
   },
   {
-    img: "/crousal_images2/black_work_tattoo1.jpeg",
+    img: "/artist_image/artist2.jpg",
     name: "Rohan",
     craft: "Blackwork & traditional",
     quote: "Bold and permanent — I want it to still mean something in twenty years.",
-    bio: "Two generations of traditional artists shaped Rohan's hand before Teyung did — saturated black, confident outlines, and a respect for how a piece ages on skin, not just how it photographs on the day it's finished.",
+    bio: "Two generations of traditional artists shaped Rohan's hand before Abishek did — saturated black, confident outlines, and a respect for how a piece ages on skin, not just how it photographs on the day it's finished.",
     stats: [
       { value: "11+ Yrs", label: "Experience" },
       { value: "800+", label: "Happy clients" },
@@ -90,7 +92,7 @@ const ARTISTS: Artist[] = [
     portfolio: DUMMY_PORTFOLIO,
   },
   {
-    img: "/crousal_images2/traditional_tattoo1.jpeg",
+    img: "/artist_image/artist3.jpg",
     name: "Sita",
     craft: "Heritage & ornamental",
     quote: "Heritage isn't a style to me — it's the hand I learned to draw with.",
@@ -134,6 +136,53 @@ export default function ArtistShowcaseSlider() {
   const [active, setActive] = useState(0);
   const [hoverIdx, setHoverIdx] = useState<number | null>(null);
   const [storyIdx, setStoryIdx] = useState<number | null>(null);
+  // ── Jinn transition (JINN_TRANSITION_PLAN.md) ──────────────────────────
+  // The black-glass backdrop is the "lamp": it erupts from the clicked card
+  // (a card-sized sheet that scales up to fill the screen) and collapses back
+  // into it on close. Two card-side micro-beats frame it: the Rub on open, the
+  // Acceptance pulse on return. The portrait layoutId morph is left intact —
+  // both it and the backdrop collapse into the same card together.
+  const [rubIdx, setRubIdx] = useState<number | null>(null);       // Beat 1 — card pulsing pre-open
+  const [acceptingIdx, setAcceptingIdx] = useState<number | null>(null); // Beat 5 — card sealing post-return
+  const lastStoryIdxRef = useRef<number | null>(null);             // survives the storyIdx→null clear, so the pulse knows its card
+  // Open with the Rub: the card registers the touch (~90ms) before the sheet
+  // erupts. The sheet's geometry is handled by Framer's shared-layout morph
+  // off the card's lamp anchor — no manual getBoundingClientRect needed.
+  const openStory = (idx: number) => {
+    if (storyIdx !== null || rubIdx !== null) return;
+    setAcceptingIdx(null); // guard rapid re-open mid-pulse
+    setRubIdx(idx);
+    window.setTimeout(() => {
+      setRubIdx(null);
+      lastStoryIdxRef.current = idx;
+      setStoryIdx(idx);
+    }, 90);
+  };
+  // gold arrival top-note — flips true the instant the morphing portrait's
+  // shared-layout journey lands, fires the bloom, then resets so it can
+  // replay fresh on the next open.
+  const [portraitArrived, setPortraitArrived] = useState(false);
+  // the relay — open AND close — rides as ONE continuous overlapping breath,
+  // never a queue of fully-finished steps waiting their turn. OPEN: face,
+  // story and work all begin the instant the sheet starts erupting, each on
+  // its own calibrated head-start (see the compartments below). CLOSE is the
+  // exact mirror, walked backward — the work steps back first (closing, no
+  // delay), the story follows it overlapping (closing, +0.25s), and once the
+  // story has actually finished retreating, the sheet takes the portrait home
+  // with it as the room dissolves around them, together, in one farewell
+  // breath. That final handoff is the one moment that still waits on a real
+  // completion (the story's `onAnimationComplete`, below) — never a guessed
+  // delay — because it's the moment the whole overlay unmounts; everything
+  // before it is calibrated overlap, exactly like the open.
+  const [closing, setClosing] = useState(false);
+  const requestClose = () => {
+    if (storyIdx === null || closing) return;
+    setClosing(true);
+  };
+  useEffect(() => {
+    setPortraitArrived(false);
+    setClosing(false);
+  }, [storyIdx]);
   const compact = useCompact();
   const galleryCols = useGalleryCols();
   const a = ARTISTS[active];
@@ -165,11 +214,11 @@ export default function ArtistShowcaseSlider() {
   useEffect(() => {
     if (storyIdx === null) return;
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setStoryIdx(null);
+      if (e.key === "Escape") requestClose();
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [storyIdx]);
+  }, [storyIdx, closing]);
 
   // lock page scroll while the story overlay is open — same as the gallery lightbox
   useEffect(() => {
@@ -186,7 +235,9 @@ export default function ArtistShowcaseSlider() {
   const tileH = compact ? "clamp(168px, 46vw, 212px)" : "clamp(266px, 21vw, 338px)";
 
   return (
+    <LayoutGroup>
     <section
+      id="artists"
       aria-label="Artist showcase slider"
       data-transparent-header
       style={{
@@ -220,7 +271,7 @@ export default function ArtistShowcaseSlider() {
           zIndex: 2,
           pointerEvents: "none",
           background:
-            "linear-gradient(to right, rgba(7,6,5,0.88) 0%, rgba(7,6,5,0.6) 36%, rgba(7,6,5,0.12) 70%, rgba(7,6,5,0) 100%), linear-gradient(to top, rgba(7,6,5,0.55) 0%, rgba(7,6,5,0) 38%)",
+            "linear-gradient(to right, rgba(7,6,5,0.74) 0%, rgba(7,6,5,0.4) 42%, rgba(7,6,5,0.06) 76%, rgba(7,6,5,0) 100%), linear-gradient(to top, rgba(7,6,5,0.4) 0%, rgba(7,6,5,0) 42%)",
         }}
       />
 
@@ -299,7 +350,7 @@ export default function ArtistShowcaseSlider() {
           </p>
 
           <div style={{ display: "flex", gap: 16, flexWrap: "wrap" }}>
-            <button style={btnSolid} onClick={() => setStoryIdx(active)}>VIEW STORY</button>
+            <button style={btnSolid} onClick={() => openStory(active)}>VIEW STORY</button>
             <button style={btnOutline}>BOOK A SESSION</button>
           </div>
         </div>
@@ -327,14 +378,58 @@ export default function ArtistShowcaseSlider() {
         {ARTISTS.map((t, idx) => {
           const isActive = idx === active;
           const isHover = hoverIdx === idx;
+          // a story is open AND this isn't the card whose portrait just left —
+          // the wall quietly settles, the way a room quiets when someone steps
+          // forward. Reverses the instant the story closes.
+          const isBystander = storyIdx !== null && idx !== storyIdx;
+          const baseShadow = isActive
+            ? "0 24px 60px rgba(0,0,0,0.55), 0 0 0 1px rgba(255,255,255,0.3)"
+            : "0 20px 50px rgba(0,0,0,0.45)";
+          // Beat 1 (Rub) and Beat 5 (Acceptance) ride on the card's own scale
+          // channel — temporally exclusive with the bystander settle, so a
+          // simple priority cascade is safe. Gold rides the box-shadow.
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          let cardAnimate: any;
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          let cardTransition: any;
+          if (rubIdx === idx) {
+            // the invocation — a quick swell + gold flush before the lamp opens
+            cardAnimate = {
+              scale: [1, 1.02, 1],
+              opacity: 1,
+              boxShadow: [baseShadow, `${baseShadow}, 0 0 20px rgba(203,164,90,0.7)`, baseShadow],
+            };
+            cardTransition = { duration: 0.09, ease: "easeInOut" };
+          } else if (acceptingIdx === idx) {
+            // the seal — receive the Jinn back: dip, overshoot, settle + gold bloom
+            cardAnimate = {
+              scale: [1, 0.97, 1.01, 1],
+              opacity: 1,
+              boxShadow: [baseShadow, `${baseShadow}, 0 0 22px rgba(203,164,90,0.55)`, baseShadow, baseShadow],
+            };
+            cardTransition = { duration: 0.22, times: [0, 0.36, 0.64, 1], ease: "easeInOut" };
+          } else {
+            cardAnimate = { scale: isBystander ? 0.97 : 1, opacity: isBystander ? 0.8 : 1 };
+            cardTransition = {
+              default: { duration: 0.25, ease: [0.22, 1, 0.36, 1] },
+              scale: { duration: 0.55, ease: [0.22, 1, 0.36, 1] },
+              opacity: { duration: 0.55, ease: [0.22, 1, 0.36, 1] },
+            };
+          }
           return (
-            <motion.button
+            <motion.div
               key={idx}
               whileHover={{ y: -6 }}
-              transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
+              animate={cardAnimate}
+              transition={cardTransition}
               onClick={() => setActive(idx)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" || e.key === " ") { e.preventDefault(); setActive(idx); }
+              }}
               onMouseEnter={() => setHoverIdx(idx)}
               onMouseLeave={() => setHoverIdx(null)}
+              role="button"
+              tabIndex={0}
               aria-label={`Show ${t.name}`}
               aria-current={isActive}
               style={{
@@ -346,14 +441,49 @@ export default function ArtistShowcaseSlider() {
                 cursor: "pointer",
                 padding: 0,
                 border: "3px solid rgba(255,255,255,0.7)",
-                backgroundImage: `url(${t.img})`,
-                backgroundSize: "cover",
-                backgroundPosition: "center",
                 boxShadow: isActive
                   ? "0 24px 60px rgba(0,0,0,0.55), 0 0 0 1px rgba(255,255,255,0.3)"
                   : "0 20px 50px rgba(0,0,0,0.45)",
               }}
             >
+              {/* lamp anchor — the "from" box for the backdrop eruption.
+                  Invisible (no fill); Framer measures it and morphs the
+                  black-glass backdrop out of this exact rect on open, back
+                  into it on close. Only mounted while the story is closed, so
+                  it and the backdrop never share the layoutId simultaneously
+                  (the standard shared-element handoff). */}
+              {storyIdx === null && (
+                <motion.div
+                  layoutId={`jinn-lamp-${idx}`}
+                  style={{ position: "absolute", inset: 0, borderRadius: 18, pointerEvents: "none", zIndex: 0 }}
+                />
+              )}
+
+              {/* shared-element morph anchor — same layoutId as the story
+                  overlay's portrait below; Framer Motion travels this exact
+                  image between the two positions/shapes on open AND close. */}
+              <motion.img
+                layoutId={`artist-photo-${idx}`}
+                src={t.img}
+                alt={t.name}
+                // Both directions now carry the SAME premium weight: CLOSE
+                // is brought up by the same compounded ×1.82 (1.3 × 1.4)
+                // that's been layered onto OPEN since they last matched —
+                // 0.405 → 0.74 — so the journey home still runs the same
+                // ~10% brisker than the journey out (0.74/0.82 ≈ 0.90),
+                // just at the new, unhurried tempo. Both anchors must agree
+                // on whichever direction is live, or the shared morph
+                // judders. (See the overlay's portrait img below.)
+                transition={{ duration: closing ? 0.74 : 0.82, ease: [0.22, 1, 0.36, 1] }}
+                style={{
+                  position: "absolute",
+                  inset: 0,
+                  width: "100%",
+                  height: "100%",
+                  objectFit: "cover",
+                  borderRadius: 18,
+                }}
+              />
               <div
                 style={{
                   position: "absolute",
@@ -369,7 +499,7 @@ export default function ArtistShowcaseSlider() {
                 aria-label={`View ${t.name}'s story`}
                 onClick={(e) => {
                   e.stopPropagation();
-                  setStoryIdx(idx);
+                  openStory(idx);
                 }}
                 style={{
                   position: "absolute",
@@ -418,7 +548,7 @@ export default function ArtistShowcaseSlider() {
                   {isActive ? "Now showing" : t.craft}
                 </div>
               </div>
-            </motion.button>
+            </motion.div>
           );
         })}
       </div>
@@ -426,13 +556,33 @@ export default function ArtistShowcaseSlider() {
       {/* story overlay — same glassmorphism lightbox mechanics as the gallery
           (blur backdrop, dark weight layer, ✕ / Esc / backdrop-click close,
           scroll lock). No center image for now — just their voice, large. */}
-      <AnimatePresence>
+      <AnimatePresence
+        onExitComplete={() => {
+          // Beat 5 — the sheet has finished collapsing home. Seal it: fire the
+          // acceptance pulse on the card it came from, then clear.
+          const idx = lastStoryIdxRef.current;
+          if (idx === null) return;
+          setAcceptingIdx(idx);
+          window.setTimeout(() => {
+            setAcceptingIdx((cur) => (cur === idx ? null : cur));
+          }, 240);
+          lastStoryIdxRef.current = null;
+        }}
+      >
         {storyIdx !== null && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            onClick={() => setStoryIdx(null)}
+            // blur/scrim fade synced to the collapse: no early finish, same
+            // ease-in, so the room dims out exactly as the sheet lands home.
+            // Brought up to the same premium weight as the open — ×1.82
+            // (the compounded slowdown OPEN has carried since they last
+            // matched): 0.48 → 0.87.
+            exit={{ opacity: 0, transition: { duration: 0.87, ease: [0.6, 0, 1, 1] } }}
+            // entrance — another 40% on top of the prior slowdowns, so the
+            // room's dimming keeps matching the eruption's deliberate pace.
+            transition={{ duration: 0.74, ease: "easeOut" }}
+            onClick={() => requestClose()}
             style={{
               position: "fixed",
               inset: 0,
@@ -446,17 +596,63 @@ export default function ArtistShowcaseSlider() {
               paddingRight: "clamp(12px, 1.5vw, 24px)",
               paddingLeft: compact ? "clamp(12px, 1.5vw, 24px)" : "clamp(48px, 6vw, 110px)",
               overflow: "hidden",
-              background: "rgba(0,0,0,0.08)",
+              background: "rgba(0,0,0,0.14)",
               backdropFilter: "blur(7px)",
               WebkitBackdropFilter: "blur(7px)",
             }}
           >
-            {/* black weight layer — sits over the blur, under all content */}
-            <div
+            {/* THE LAMP SHEET — the black-glass mass that erupts from the card
+                and collapses back into it. Shares its layoutId with the clicked
+                card's lamp anchor: on open Framer springs it out of that rect
+                (overshoot); on close it gets pulled home with an ease-in
+                acceleration. It's out of flow (absolute inset 0), so morphing
+                it never disturbs the compartment layout above.
+
+                CLOSE — its actual collapse (the layoutId FLIP + corner
+                return) can only fire at the real unmount, same as before —
+                that's the one moment DOM ownership of the shared element
+                actually changes hands, and chasing it earlier would mean
+                truncating info/portrait's fades mid-flight (the exact bug we
+                just fixed for the portrait, one level up). So instead of
+                moving that trigger, the glass gets its own early "first
+                breath of departure" — a soft dim that starts ~15% sooner
+                than the FLIP does (0.72s in, vs. the ~0.85s the unmount
+                lands at), telling the room it's already begun to leave
+                before it visibly moves. Then the actual fold-home — both the
+                layout journey and the corner return — runs ~10% slower than
+                before (0.87 → 0.96s): less a snap-shut, more an unhurried
+                settle, with the room exhaling around it the whole way. */}
+            <motion.div
+              layoutId={storyIdx !== null ? `jinn-lamp-${storyIdx}` : undefined}
+              initial={{ borderRadius: 18 }}
+              animate={{ borderRadius: 0, opacity: closing ? 0.78 : 1 }}
+              exit={{ borderRadius: 18 }}
+              transition={{
+                // OPEN — three slowdown passes deep now (ζ ≈ 0.536 held
+                // constant throughout: 59/8.2 carries the exact same
+                // overshoot character as 115/11.5, 195/15 and the original
+                // 280/18, just unfolding at its own unhurried pace).
+                //
+                // CLOSE — now ~10% slower again (0.87 → 0.96), an even more
+                // unhurried fold-home with the same accelerating "pulled-in"
+                // character — the Jinn isn't snapping back, it's settling.
+                layout: closing
+                  ? { duration: 0.96, ease: [0.6, 0, 1, 1] }            // collapse — eased further into its premium pace
+                  : { type: "spring", stiffness: 59, damping: 8.2 },    // erupt — spring with overshoot
+                borderRadius: closing
+                  ? { duration: 0.96, ease: [0.6, 0, 1, 1] }
+                  : { duration: 1.09, ease: [0.22, 1, 0.36, 1] },
+                // the early "first breath" — a soft dim, ~15% ahead of the
+                // FLIP's ~0.85s unmount trigger, so the glass is visibly
+                // already letting go before it structurally can move.
+                opacity: closing
+                  ? { delay: 0.72, duration: 0.3, ease: [0.22, 1, 0.36, 1] }
+                  : { duration: 0 },
+              }}
               style={{
                 position: "absolute",
                 inset: 0,
-                background: "rgba(0,0,0,0.40)",
+                background: "rgba(0,0,0,0.62)", // deeper black — more depth through the erupt/collapse
                 pointerEvents: "none",
                 zIndex: 0,
               }}
@@ -475,7 +671,7 @@ export default function ArtistShowcaseSlider() {
                 padding: "14px clamp(16px, 3vw, 36px)",
               }}
             >
-              <button aria-label="Close" onClick={() => setStoryIdx(null)} style={circleBtn}>
+              <button aria-label="Close" onClick={() => requestClose()} style={circleBtn}>
                 ✕
               </button>
             </div>
@@ -484,18 +680,36 @@ export default function ArtistShowcaseSlider() {
                 (image) + (info) stacked on the left, (gallery) taking the
                 larger share on the right. Each is its own warm-white panel
                 with curved edges, separated by a clear gutter. */}
+            {/* nested AnimatePresence — without it, the sheet would vanish
+                instantly the moment storyIdx clears (its conditional sits
+                inside an already-exiting backdrop, so React would remove it
+                before its own exit gets a turn). This lets it retreat on
+                its own terms — and by the time storyIdx actually clears
+                (see the close relay below), the gallery and info
+                compartments have already taken their leave: what's left to
+                exit here is the sheet around the portrait, going home with
+                it and the room, together, as one farewell breath. */}
+            <AnimatePresence>
             {storyIdx !== null && (
               <motion.div
                 key={storyIdx}
                 onClick={(e) => e.stopPropagation()}
-                initial={{ opacity: 0, scale: 0.96 }}
-                animate={{ opacity: 1, scale: 1 }}
+                // No competing transform here on the way out. `scale` would
+                // create its own projection node and fight the portrait's
+                // layoutId FLIP for the same transform budget — Framer
+                // resolves that fight by abandoning the morph and crossfading
+                // in place, which is exactly the "it erases itself, leaves the
+                // portrait behind" bug. So: opacity only (cascades visually
+                // without touching layout/transform math), and held until
+                // AFTER the portrait + sheet have made the trip home — by
+                // then this shell is already empty, so its fade is invisible.
+                exit={{ opacity: 0, transition: { delay: 0.8, duration: 0.3, ease: [0.22, 1, 0.36, 1] } }}
                 style={{
                   position: "relative",
                   zIndex: 305,
                   width: "100%",
-                  maxWidth: 1540,
-                  height: compact ? "auto" : "min(980px, 94vh)",
+                  maxWidth: 1309,
+                  height: compact ? "auto" : "min(833px, 94vh)",
                   maxHeight: "94vh",
                   display: "flex",
                   flexDirection: compact ? "column" : "row",
@@ -503,48 +717,113 @@ export default function ArtistShowcaseSlider() {
                   overflowY: compact ? "auto" : "visible",
                 }}
               >
-                {/* left stack — portrait compartment + info compartment.
-                    Natural height — only the gallery is asked to fill the frame. */}
-                <div
+                {/* THE STORY — portrait + info, merged into one considered
+                    dossier rather than two floating pieces: a single warm
+                    -white card with the medallion riding at its head and
+                    the record settling below it. The portrait still makes
+                    its own layoutId journey — eruption, gathering shadow,
+                    one-time gold-ring flourish, all untouched — it simply
+                    lands inside the card now instead of beside it. And the
+                    card itself now owns "arrival" and "departure" as ONE
+                    motion — there's exactly one thing to animate where two
+                    used to need keeping in step (the same kind of
+                    simplification that closed the portrait/sheet desync one
+                    level up, just one beat earlier in the chain). */}
+                <motion.div
+                  key={`story-${storyIdx}`}
+                  initial={{ opacity: 0, y: 22 }}
+                  animate={{ opacity: closing ? 0 : 1, y: closing ? 22 : 0 }}
+                  transition={
+                    closing
+                      ? { delay: 0.25, duration: 0.6, ease: [0.22, 1, 0.36, 1] }
+                      : { delay: 0.48, duration: 0.84, ease: [0.22, 1, 0.36, 1] }
+                  }
+                  onAnimationComplete={() => {
+                    // the story has finished its retreat — release the
+                    // overlay now: the sheet's journey home and the room's
+                    // dissolve begin together, the final beat.
+                    if (closing) setStoryIdx(null);
+                  }}
                   style={{
                     display: "flex",
                     flexDirection: "column",
+                    justifyContent: compact ? "flex-start" : "center",
                     gap: compact ? 16 : 22,
                     width: compact ? "100%" : "40%",
+                    height: compact ? "auto" : "100%",
                     flexShrink: 0,
                     alignSelf: compact ? "stretch" : "flex-start",
                     marginRight: compact ? 0 : "clamp(10px, 1.6vw, 28px)",
                     marginBottom: compact ? 0 : "clamp(8px, 1.4vw, 22px)",
+                    background: COLORS.cream,
+                    borderRadius: 28,
+                    padding: compact ? "2.4rem 1.4rem 2rem" : "3rem 1.8rem 2.5rem",
+                    boxShadow: "0 24px 70px rgba(0,0,0,0.5)",
                   }}
                 >
-                  {/* compartment 1 — portrait — fills the column's full width */}
+                  {/* the medallion — portrait, centered at the card's head.
+                      Same layoutId journey as ever (square card-thumb →
+                      circle, the eruption's centerpiece, shadow gathering,
+                      gold ring on arrival) — and on the way out it no
+                      longer needs its own fade at all: it's riding inside
+                      the card now, so the card's single opacity breath
+                      carries it home for free. One less thing to keep in
+                      sync, by construction rather than by calibration. */}
                   <div style={{ width: "100%", display: "flex", justifyContent: "center" }}>
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img
-                      src={ARTISTS[storyIdx].img}
-                      alt={ARTISTS[storyIdx].name}
-                      style={{
-                        display: "block",
-                        width: compact ? 220 : 300,
-                        height: compact ? 220 : 300,
-                        objectFit: "cover",
-                        borderRadius: "50%",
-                        border: `6px solid ${COLORS.cream}`,
-                        boxShadow: "0 24px 70px rgba(0,0,0,0.5)",
-                      }}
-                    />
+                    <div style={{ position: "relative", width: compact ? 187 : 255, height: compact ? 187 : 255 }}>
+                      <motion.img
+                        layoutId={`artist-photo-${storyIdx}`}
+                        src={ARTISTS[storyIdx].img}
+                        alt={ARTISTS[storyIdx].name}
+                        initial={{ boxShadow: "0 0px 0px rgba(0,0,0,0)" }}
+                        animate={{
+                          boxShadow: [
+                            "0 0px 0px rgba(0,0,0,0)",
+                            "0 60px 130px rgba(0,0,0,0.55)",
+                            "0 24px 70px rgba(0,0,0,0.5)",
+                          ],
+                        }}
+                        transition={{
+                          // must mirror the card-side anchor exactly — both directions,
+                          // both anchors, same premium pace now (0.74 closing / 0.82 open)
+                          layout: { duration: closing ? 0.74 : 0.82, ease: [0.22, 1, 0.36, 1] },
+                          // the gathering shadow is an arrival-only flourish — slowed in step (×1.4 again)
+                          boxShadow: { duration: 0.91, times: [0, 0.55, 1], ease: [0.22, 1, 0.36, 1] },
+                        }}
+                        onLayoutAnimationComplete={() => setPortraitArrived(true)}
+                        style={{
+                          display: "block",
+                          width: "100%",
+                          height: "100%",
+                          objectFit: "cover",
+                          borderRadius: "50%",
+                          border: `6px solid ${COLORS.cream}`,
+                        }}
+                      />
+                      {/* the gold top note — fires once on arrival, never repeats */}
+                      {portraitArrived && (
+                        <motion.div
+                          key={`gold-ring-${storyIdx}`}
+                          initial={{ opacity: 0, scale: 0.92 }}
+                          animate={{ opacity: [0, 0.85, 0], scale: [0.92, 1.04, 1.1] }}
+                          transition={{ duration: 0.9, times: [0, 0.4, 1], ease: "easeOut" }}
+                          style={{
+                            position: "absolute",
+                            inset: -8,
+                            borderRadius: "50%",
+                            border: `1.5px solid ${COLORS.gold}`,
+                            boxShadow: "0 0 26px 2px rgba(203,164,90,0.32)",
+                            pointerEvents: "none",
+                          }}
+                        />
+                      )}
+                    </div>
                   </div>
 
-                  {/* compartment 2 — info — fills the column's full width */}
-                  <div
-                    style={{
-                      width: "100%",
-                      background: COLORS.cream,
-                      borderRadius: 16,
-                      padding: compact ? "2rem 1.4rem" : "2.7rem 1.8rem",
-                      boxShadow: "0 24px 70px rgba(0,0,0,0.5)",
-                    }}
-                  >
+                  {/* the record — craft, name, voice, bio, stats. Same
+                      content as ever; it just rides with the card as one
+                      piece now rather than carrying its own arrival. */}
+                  <div>
                     <div
                       style={{
                         fontFamily: SANS,
@@ -650,13 +929,30 @@ export default function ArtistShowcaseSlider() {
                       ))}
                     </div>
                   </div>
-                </div>
+                </motion.div>
 
                 {/* compartment 3 — gallery: same wall-of-work DNA as the
                     main gallery section, tuned to 3-up for the modal.
                     Fills the full frame height; scrolls internally —
-                    scrollbar hidden so the rounded right edge stays clean. */}
-                <div
+                    scrollbar hidden so the rounded right edge stays clean.
+                    Last to surface in the open overlap (delay 0.73 — woven
+                    through the tail of the eruption, not queued after it).
+                    CLOSE is its exact mirror in role: "the work" is the
+                    FIRST to retreat now, no head-start at all (delay 0) —
+                    the instant the relay turns toward "leave," this is what
+                    moves first, with the story overlapping its departure
+                    a beat later. Same continuous-breath choreography as the
+                    open, walked backward — nothing waits for a full stop
+                    before the next beat begins. */}
+                <motion.div
+                  key={`gallery-${storyIdx}`}
+                  initial={{ opacity: 0, x: 36 }}
+                  animate={{ opacity: closing ? 0 : 1, x: closing ? 36 : 0 }}
+                  transition={
+                    closing
+                      ? { delay: 0, duration: 0.6, ease: [0.22, 1, 0.36, 1] }
+                      : { delay: 0.73, duration: 0.73, ease: [0.22, 1, 0.36, 1] }
+                  }
                   style={{
                     position: "relative",
                     width: compact ? "100%" : "60%",
@@ -717,7 +1013,7 @@ export default function ArtistShowcaseSlider() {
                       maxWidth: "54ch",
                     }}
                   >
-                    Real pieces, real skin — straight from the Teyung chair.
+                    Real pieces, real skin — straight from the Abishek chair.
                   </p>
                   {/* same masonry DNA as the gallery section: CSS columns,
                       break-inside avoid, natural image heights — column
@@ -797,17 +1093,19 @@ export default function ArtistShowcaseSlider() {
                     </motion.div>
                   )}
                 </AnimatePresence>
-                </div>
+                </motion.div>
                 <style jsx>{`
                   .story-gallery-scroll::-webkit-scrollbar { display: none; }
                   .story-gallery-scroll { scrollbar-width: none; -ms-overflow-style: none; }
                 `}</style>
               </motion.div>
             )}
+            </AnimatePresence>
           </motion.div>
         )}
       </AnimatePresence>
     </section>
+    </LayoutGroup>
   );
 }
 

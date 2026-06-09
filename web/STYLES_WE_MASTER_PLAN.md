@@ -16,7 +16,7 @@ so it stops feeling like a widget and starts feeling inevitable.
 
 ## 1. Purpose & emotional job
 
-**What this section IS:** the studio's **service menu** — *"here is what Teyung Tattoo Ink
+**What this section IS:** the studio's **service menu** — *"here is what Abishek Tattoo Ink
 offers you"* (Fine Line, Blackwork, Traditional, Realism, Custom, Cover-Up, Piercing, Laser
 Removal). It introduces capability *before* the gallery proves it.
 
@@ -328,7 +328,7 @@ This is what makes the work *present*. Fallbacks: the existing `public/crousls_i
   - Component **renamed `ServiceSlider.tsx` → [StudioTour.tsx](components/StudioTour.tsx)**; same
     transition DNA, new content: areas = **Reception · Private Studios · Sterile Station · The Art
     Wall · Consultation Lounge · Aftercare Bar** (6, rotation). Headline = constant **"STEP INSIDE"**
-    + the **area** as the orange accent line; per-area description; eyebrow **"TEYUNG'S TATTOO INK"**;
+    + the **area** as the orange accent line; per-area description; eyebrow **"Abishek'S TATTOO INK"**;
     CTAs **BOOK APPOINTMENT / EXPLORE OUR WORK**.
   - Assets = placeholder tattoo photos from `public/crousls_images/` (cross of service + gallery) —
     swap for real **studio interior** photos later. Reference orange still; gold re-skin later.
@@ -341,7 +341,7 @@ This is what makes the work *present*. Fallbacks: the existing `public/crousls_i
     re-pointed homepage + /concept-3. Service section is **unchanged** again (still the placeholder
     animal slider, re-skin later).
   - **Rebuilt [BrandStatement.tsx](components/BrandStatement.tsx)** as a FIXED studio anchor (no
-    slider/scrub — gentle `Reveal` fade only): gold-dash eyebrow "Teyung's Tattoo Ink", two-tone
+    slider/scrub — gentle `Reveal` fade only): gold-dash eyebrow "Abishek's Tattoo Ink", two-tone
     gold/white serif slogan (kept "…motifs meet modern ink"), brand paragraph, and a gold-bordered
     **studio-interior photo with a fixed label card** ("Our Studio / Thamel, Kathmandu"). **No stats,
     no CTAs** (per request). Placeholder photo for now; swap a real interior shot later.

@@ -13,7 +13,7 @@
 // Assets: 3 jungle/animal stills in ROTATION across 6 slides. No auto-advance.
 import { useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { SERIF, SANS, COLORS, GUTTER } from "@/lib/theme";
+import { SERIF, SANS, COLORS, GUTTER, BOOKING_HREF } from "@/lib/theme";
 
 const IMG = "/crousal_images2";
 
@@ -243,7 +243,7 @@ export default function ServiceSlider() {
 
   return (
     // 250vh wrapper — passive scroll hold budget + escape-velocity gate anchor
-    <div ref={wrapperRef} style={{ height: "250vh", position: "relative" }}>
+    <div id="styles" data-cursor="scrub" ref={wrapperRef} style={{ height: "250vh", position: "relative" }}>
       <section
         aria-label="Design slider"
         data-transparent-header
@@ -267,6 +267,23 @@ export default function ServiceSlider() {
             background: "linear-gradient(to bottom, rgba(16,14,11,1) 0%, rgba(16,14,11,0) 100%)",
             pointerEvents: "none",
             zIndex: 10,
+          }}
+        />
+
+        {/* B4 — resting track: a quiet gold rail, always present, so a first-time
+            visitor sees the pacing affordance before they've clicked anything.
+            The depleting fill (below) rides on top once a transition starts. */}
+        <div
+          aria-hidden
+          style={{
+            position: "absolute",
+            top: 0,
+            left: 0,
+            right: 0,
+            height: 4,
+            background: "rgba(203,164,90,0.18)",
+            zIndex: 7,
+            pointerEvents: "none",
           }}
         />
 
@@ -426,20 +443,35 @@ export default function ServiceSlider() {
                   {s.desc}
                 </motion.p>
                 <motion.div variants={txtLine} style={{ display: "flex", gap: 16, flexWrap: "wrap" }}>
-                  <button style={btnSolid}>SEE MORE</button>
-                  <button style={btnOutline}>SUBSCRIBE</button>
+                  {/* B4 — real intent, wired. Primary books this style; secondary
+                      sends you to the work. (Was placeholder SEE MORE / SUBSCRIBE.) */}
+                  <motion.a
+                    href={BOOKING_HREF}
+                    whileHover={{ scale: 1.04 }}
+                    whileTap={{ scale: 0.98 }}
+                    transition={{ duration: 0.22, ease: EASE }}
+                    style={btnSolid}
+                  >
+                    BOOK THIS STYLE
+                  </motion.a>
+                  <motion.a
+                    href="/#gallery"
+                    whileHover={{ scale: 1.04, borderColor: "rgba(255,255,255,0.9)" }}
+                    whileTap={{ scale: 0.98 }}
+                    transition={{ duration: 0.22, ease: EASE }}
+                    style={btnOutline}
+                  >
+                    VIEW GALLERY
+                  </motion.a>
                 </motion.div>
               </motion.div>
             </AnimatePresence>
 
-          {/* arrows */}
+          {/* arrows — SVG chevrons with a hover micro-animation (ring brightens,
+              chevron nudges in its travel direction). */}
           <div style={{ display: "flex", gap: 14, marginTop: "clamp(2rem, 5vh, 3.5rem)" }}>
-            <button aria-label="Previous" onClick={() => go(-1)} style={arrow}>
-              ‹
-            </button>
-            <button aria-label="Next" onClick={() => go(1)} style={arrow}>
-              ›
-            </button>
+            <ArrowBtn dir={-1} onClick={() => go(-1)} />
+            <ArrowBtn dir={1} onClick={() => go(1)} />
           </div>
         </div>
 
@@ -530,6 +562,8 @@ export default function ServiceSlider() {
 }
 
 const btnSolid: React.CSSProperties = {
+  display: "inline-block",
+  textDecoration: "none",
   fontFamily: "var(--font-inter), sans-serif",
   fontWeight: 700,
   letterSpacing: "0.12em",
@@ -543,6 +577,8 @@ const btnSolid: React.CSSProperties = {
 };
 
 const btnOutline: React.CSSProperties = {
+  display: "inline-block",
+  textDecoration: "none",
   fontFamily: "var(--font-inter), sans-serif",
   fontWeight: 700,
   letterSpacing: "0.12em",
@@ -559,14 +595,63 @@ const arrow: React.CSSProperties = {
   width: 52,
   height: 52,
   borderRadius: "50%",
-  border: "1px solid rgba(255,255,255,0.45)",
-  background: "rgba(255,255,255,0.04)",
+  borderWidth: 1,
+  borderStyle: "solid",
   color: "#fff",
-  fontSize: "1.5rem",
   lineHeight: 1,
   cursor: "pointer",
   display: "flex",
   alignItems: "center",
   justifyContent: "center",
-  fontFamily: "var(--font-inter), sans-serif",
+  padding: 0,
 };
+
+// SVG chevron button with a hover micro-animation (ring brightens, chevron
+// nudges in its direction). Replaces the old typographic ‹ › glyphs.
+function ArrowBtn({ dir, onClick }: { dir: -1 | 1; onClick: () => void }) {
+  return (
+    <motion.button
+      aria-label={dir === -1 ? "Previous" : "Next"}
+      onClick={onClick}
+      initial="rest"
+      whileHover="hover"
+      whileTap={{ scale: 0.94 }}
+      variants={{
+        rest: {
+          borderColor: "rgba(255,255,255,0.45)",
+          backgroundColor: "rgba(255,255,255,0.04)",
+        },
+        hover: {
+          borderColor: "rgba(255,255,255,0.9)",
+          backgroundColor: "rgba(255,255,255,0.12)",
+        },
+      }}
+      transition={{ duration: 0.22, ease: EASE }}
+      style={arrow}
+    >
+      <motion.span
+        variants={{ hover: { x: dir * 3 } }}
+        transition={{ duration: 0.22, ease: EASE }}
+        style={{ display: "inline-flex" }}
+      >
+        <svg
+          width="18"
+          height="18"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="1.8"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          aria-hidden
+        >
+          {dir === -1 ? (
+            <polyline points="15 18 9 12 15 6" />
+          ) : (
+            <polyline points="9 18 15 12 9 6" />
+          )}
+        </svg>
+      </motion.span>
+    </motion.button>
+  );
+}
