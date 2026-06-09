@@ -8,6 +8,7 @@ import {
   useMotionTemplate,
   useMotionValueEvent,
 } from "framer-motion";
+import { BOOKING_HREF } from "@/lib/theme";
 
 // Slogan layer for the spider story. Beats are bottom-centered film titles
 // (the chest/spider sits dead-center, so side text would collide). Each beat
@@ -32,7 +33,7 @@ type Beat = {
 // LEAVES contradicts the message).
 const BEATS: Beat[] = [
   {
-    eyebrow: "TEYUNG TATTOO INK",
+    eyebrow: "Abishek TATTOO INK",
     headline: "Beneath every layer.",
     window: [0, 0.04, 0.22, 0.34],
     startVisible: true,
@@ -152,7 +153,7 @@ function BeatBlock({
 
         {beat.cta && !embedded && (
           <a
-            href="#book"
+            href={BOOKING_HREF}
             style={{
               display: "inline-flex",
               alignItems: "center",

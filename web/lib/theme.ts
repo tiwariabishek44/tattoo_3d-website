@@ -1,4 +1,4 @@
-// Shared design tokens for the Teyung Tattoo Ink site.
+// Shared design tokens for the Abishek Tattoo Ink site.
 export const SERIF = "var(--font-cormorant), Georgia, serif";
 export const SANS = "var(--font-inter), system-ui, sans-serif";
 
@@ -31,3 +31,8 @@ export const GUTTER = "clamp(16px, 1.8vw, 28px)"; // shared side gutter / left r
 // Pick a hero frame as a placeholder image (swap for real photos later).
 export const frame = (n: number) =>
   `/frames/frame_${String(n).padStart(6, "0")}.webp`;
+
+// Single source of truth for the "book" action. Honest interim per
+// HOMEPAGE_FRAGRANCE_PLAN.md Q3 (mailto / contact) — swap for a real booking
+// flow/URL later in ONE place and every CTA on the site follows.
+export const BOOKING_HREF = "mailto:hello@Abishek.ink?subject=Booking%20enquiry%20%E2%80%94%20Abishek%20Tattoo%20Ink";

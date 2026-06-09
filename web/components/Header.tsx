@@ -1,26 +1,32 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { usePathname } from "next/navigation";
 
 const SANS = "var(--font-inter), system-ui, sans-serif";
+// Real nav — every item lands somewhere honest. On-page items smooth-scroll to
+// their section anchor (IDs live on each section root); After Care is its own
+// minimal page. Sandbox routes (design-2 / concept-3/4/5) are intentionally
+// kept OUT of the public menu — dev-only.
 const NAV: { label: string; href: string }[] = [
-  { label: "Home", href: "/" },
-  { label: "About Us", href: "#" },
-  { label: "Artists", href: "#" },
-  { label: "After Care", href: "#" },
-  { label: "Gallery", href: "#" },
-  { label: "Design 2", href: "/design-2" },
-  { label: "Studio Tour", href: "/concept-3" },
-  { label: "Concept 4", href: "/concept-4" },
-  { label: "Concept 5", href: "/concept-5" },
-  { label: "Contact", href: "#" },
+  { label: "Home", href: "/#top" },
+  { label: "About", href: "/#about" },
+  { label: "Styles", href: "/#styles" },
+  { label: "Gallery", href: "/#gallery" },
+  { label: "Artists", href: "/#artists" },
+  { label: "After Care", href: "/after-care" },
+  { label: "Contact", href: "/#contact" },
+  { label: "Concept 1", href: "/concept-1" },
+  { label: "Concept 2", href: "/concept-2" },
 ];
 
 export default function Header() {
   const [scrolled, setScrolled] = useState(false);
   const [hidden, setHidden] = useState(false);
   const [overImage, setOverImage] = useState(false);
+  const [activeId, setActiveId] = useState("top");
   const lastY = useRef(0);
+  const pathname = usePathname();
 
   useEffect(() => {
     const onScroll = () => {
@@ -46,6 +52,27 @@ export default function Header() {
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
+
+  // B1 — active-section indicator: mark the nav item for whichever section is
+  // crossing the viewport's middle band. Homepage only (the anchors live there).
+  useEffect(() => {
+    if (pathname !== "/") return;
+    const ids = ["top", "about", "styles", "gallery", "artists", "contact"];
+    const els = ids
+      .map((id) => document.getElementById(id))
+      .filter((el): el is HTMLElement => !!el);
+    if (!els.length) return;
+    const io = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((e) => {
+          if (e.isIntersecting) setActiveId(e.target.id);
+        });
+      },
+      { rootMargin: "-45% 0px -45% 0px", threshold: 0 }
+    );
+    els.forEach((el) => io.observe(el));
+    return () => io.disconnect();
+  }, [pathname]);
 
   // frosted bar only when scrolled AND not over a transparent-header section.
   const frosted = scrolled && !overImage;
@@ -89,7 +116,7 @@ export default function Header() {
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src="/logo.webp"
-          alt="Teyung Tattoo Ink"
+          alt="Abishek Tattoo Ink"
           style={{
             height: scrolled
               ? "clamp(64px, 6vw, 92px)"
@@ -111,11 +138,25 @@ export default function Header() {
           pointerEvents: "auto",
         }}
       >
-        {NAV.map((item) => (
-          <a key={item.label} href={item.href} className="nav-link">
-            {item.label}
-          </a>
-        ))}
+        {NAV.map((item) => {
+          const hashId = item.href.includes("#")
+            ? item.href.split("#")[1]
+            : "";
+          const isActive =
+            pathname === "/"
+              ? hashId !== "" && hashId === activeId
+              : item.href === pathname;
+          return (
+            <a
+              key={item.label}
+              href={item.href}
+              className="nav-link"
+              data-active={isActive ? "true" : undefined}
+            >
+              {item.label}
+            </a>
+          );
+        })}
       </nav>
     </header>
   );

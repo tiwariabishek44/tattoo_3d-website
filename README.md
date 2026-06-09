@@ -1,6 +1,6 @@
 # tattoo_3d-website
 
-3D immersive, **scroll-driven** web assets (Apple-AirPods style) for **Teyung Tattoo Ink**, a Kathmandu tattoo studio.
+3D immersive, **scroll-driven** web assets (Apple-AirPods style) for **Abishek Tattoo Ink**, a Kathmandu tattoo studio.
 
 The pipeline: generate a cinematic video → extract frames (ffmpeg → WebP) → **scroll-scrub** them on a `<canvas>` for buttery, film-like reveals on the web.
 

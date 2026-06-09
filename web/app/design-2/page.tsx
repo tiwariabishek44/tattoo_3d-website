@@ -26,7 +26,7 @@ export default function Design2() {
         }}
       >
         <span aria-hidden style={{ fontSize: "0.95rem" }}>←</span>
-        Teyung
+        Abishek
       </a>
 
       <SpiderSequence />

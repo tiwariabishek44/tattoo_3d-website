@@ -40,7 +40,7 @@ Full persona: [.claude/skills/creative-lead/SKILL.md](.claude/skills/creative-le
 | [web/REVEAL_ZOOM_PLAN.md](web/REVEAL_ZOOM_PLAN.md) | **Reveal-zoom** — web-layer scroll camera for the unzip (close-up → pull back → hold) | reveal-zoom / camera work |
 | [web/STYLES_WE_MASTER_PLAN.md](web/STYLES_WE_MASTER_PLAN.md) | **Styles we master** soul upgrade — pinned scroll-driven "Service Reveal" (Concept 3 / cinematic chosen) (SSOT) | styles/services section work |
 | [web/SERVICE_MICRO_SEQUENCE_PLAN.md](web/SERVICE_MICRO_SEQUENCE_PLAN.md) | **Future elevation** — turn each service still into a scroll-scrubbed micro-sequence (PARKED until the 8 stills ship) | service micro-sequence work |
-| [hero-text-layer.md](hero-text-layer.md) | Slogan/brand-story + depth layer plan for the hero (Teyung Tattoo Ink) | text/UI work |
+| [hero-text-layer.md](hero-text-layer.md) | Slogan/brand-story + depth layer plan for the hero (Abishek Tattoo Ink) | text/UI work |
 | [homepage-plan.md](homepage-plan.md) | Full landing-page completion plan (12 sections, design system, color rhythm) | building out the whole page |
 | [frame-sequence-stack.md](frame-sequence-stack.md) | Web delivery (GSAP/canvas scroll-scrub) | when building the site |
 
@@ -58,4 +58,4 @@ per-video LOG (curriculum, raw) → FINDINGS-LOG (distilled DO/DON'T) → PROMPT
 
 ## Status
 - **Phase 1 (Videos 01–10): Geometry & Light.** V01 ✅ V02 ✅ V03 frames ✅ (video failed at platform, retry pending) V04 in progress.
-- **Live project:** tattoo-studio hero "The Instrument" for **Teyung Tattoo Ink**. Scroll-scrub web app in [web/](web/). Hero done (machine R→L→R, gold slogan beats), nav + parallax gallery + footer in place. **Now building the full page** (45%→100%) per [homepage-plan.md](homepage-plan.md) — 12 sections with dark/cream color rhythm + reveal motion. Frame pipeline = [tools/frames-engine.js](tools/frames-engine.js).
+- **Live project:** tattoo-studio hero "The Instrument" for **Abishek Tattoo Ink**. Scroll-scrub web app in [web/](web/). Hero done (machine R→L→R, gold slogan beats), nav + parallax gallery + footer in place. **Now building the full page** (45%→100%) per [homepage-plan.md](homepage-plan.md) — 12 sections with dark/cream color rhythm + reveal motion. Frame pipeline = [tools/frames-engine.js](tools/frames-engine.js).

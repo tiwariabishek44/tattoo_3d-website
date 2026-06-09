@@ -159,6 +159,7 @@ export default function SpiderSequence({
 
   return (
     <div
+      data-cursor="scrub"
       ref={containerRef}
       style={{
         height: `${VH_TOTAL}vh`,

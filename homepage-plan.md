@@ -1,4 +1,4 @@
-# Teyung Tattoo Ink — Full Homepage Plan (45% → 100%)
+# Abishek Tattoo Ink — Full Homepage Plan (45% → 100%)
 
 > Plan to complete the landing page beyond the hero. Single source of truth for the
 > full-page build. Vibe: **premium, brand-true (gold + black + serif), Kathmandu heritage + modern.**
@@ -54,7 +54,7 @@ Today = ~45%: **scroll-scrub hero + slogans + a parallax teaser + footer.** It's
 | 5 | **The Gallery** | dark | parallax + grid | upgrade parallax cards → **real images** + a masonry grid below | parallax + fade |
 | 6 | **Meet the Artists** | dark | artist cards | photo, name, specialty, socials (3–4 artists) | staggered reveal |
 | 7 | **How It Works** | **cream** | 4 numbered steps | Consult → Design → Ink → Aftercare, icon + text | step stagger |
-| 8 | **Why Teyung** | charcoal | icon grid (2×2/4) | Hygiene & safety, Custom art, Nepali heritage, Experience | icon reveal |
+| 8 | **Why Abishek** | charcoal | icon grid (2×2/4) | Hygiene & safety, Custom art, Nepali heritage, Experience | icon reveal |
 | 9 | **Testimonials** | dark | quote carousel/grid | 3–5 client quotes + names | fade/slide |
 | 10 | **Visit Us** | dark | split (info + map) | Kathmandu address, hours, phone, map embed/placeholder | reveal |
 | 11 | **Booking CTA** | **full-bleed image** | centered overlay | big "Begin your mark" + gold Book button | parallax bg + reveal |
@@ -77,7 +77,7 @@ Today = ~45%: **scroll-scrub hero + slogans + a parallax teaser + footer.** It's
 ## Implementation phases
 - **Phase A — System & scaffold:** color tokens, `<Reveal>` motion wrapper, section shells in order, cream-section styling. *(foundation)*
 - **Phase B — Core content:** Brand Statement, Stats (count-up), Styles grid, Gallery upgrade (real images + grid).
-- **Phase C — People & process:** Artists, How It Works, Why Teyung.
+- **Phase C — People & process:** Artists, How It Works, Why Abishek.
 - **Phase D — Proof & convert:** Testimonials, Visit (map), Booking CTA.
 - **Phase E — Polish:** mobile responsiveness pass, hover micro-interactions, real copy/images, performance check.
 

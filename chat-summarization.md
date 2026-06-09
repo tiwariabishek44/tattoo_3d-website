@@ -7,7 +7,7 @@
 ---
 
 ## 0. Project in one line
-3D immersive, scroll-driven web assets (Apple-AirPods style) for **Teyung Tattoo Ink** (Kathmandu studio):
+3D immersive, scroll-driven web assets (Apple-AirPods style) for **Abishek Tattoo Ink** (Kathmandu studio):
 generate cinematic video → ffmpeg frames → WebP → scroll-scrub on `<canvas>`. Site lives in [web/](web/) (Next.js 14 / TS).
 
 ## 1. ✅ LIVE on Vercel

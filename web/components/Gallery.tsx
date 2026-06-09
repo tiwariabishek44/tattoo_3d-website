@@ -115,7 +115,7 @@ export default function Gallery({ theme = "dark" }: { theme?: "dark" | "light" }
             maxWidth: "52ch",
           }}
         >
-          Real pieces, real skin — straight from the Teyung chair.
+          Real pieces, real skin — straight from the Abishek chair.
         </p>
 
         {/* filter row */}

@@ -39,10 +39,10 @@ A `SpiderText` layer (modeled on `HeroText`) — beats fade in/out, rise + focus
 
 | Beat | Scroll ≈ | Eyebrow | Headline |
 |---|---|---|---|
-| A (start / hoodie) | 0–10% | TEYUNG TATTOO INK | **Beneath every layer.** |
+| A (start / hoodie) | 0–10% | Abishek TATTOO INK | **Beneath every layer.** |
 | B (reveal / spider) | ~30% | THE ART | **Ink that's alive.** |
 | C (awakening / crawl) | ~65% | — | **Art that refuses to stay still.** |
-| D (aftermath / CTA) | ~90–100% | TEYUNG TATTOO INK | **Wear something that moves you.** + Book |
+| D (aftermath / CTA) | ~90–100% | Abishek TATTOO INK | **Wear something that moves you.** + Book |
 
 - Gold accent, off-white headlines, the cool→warm palette tokens from `theme.ts`.
 - Localized gradient behind text for legibility (the frames are busy); parallax for depth.

@@ -1,7 +1,9 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+import { motion } from "framer-motion";
 import Reveal from "./Reveal";
+import CountUp from "./CountUp";
 import { SERIF, SANS, COLORS, eyebrow } from "@/lib/theme";
 
 const STUDIO_IMG = "/studio_image.jpeg";
@@ -169,7 +171,7 @@ export default function BrandStatement() {
 
   return (
     // 250vh wrapper — 150vh of passive scroll budget in both directions
-    <div ref={wrapperRef} style={{ height: "250vh", position: "relative" }}>
+    <div id="about" ref={wrapperRef} style={{ height: "250vh", position: "relative" }}>
       <section
         style={{
           position: "sticky",
@@ -208,14 +210,14 @@ export default function BrandStatement() {
 
         <div style={{ position: "relative", zIndex: 2, padding: "0 clamp(28px, 6vw, 110px)" }}>
           <div style={{ width: COLUMN, flexShrink: 0 }}>
-            <Reveal>
+            <Reveal variant="rule">
               <div style={{ display: "flex", alignItems: "center", gap: 14, marginBottom: "1.5rem" }}>
                 <span style={{ width: 34, height: 1, background: COLORS.gold }} />
-                <span style={eyebrow()}>Teyung&apos;s Tattoo Ink</span>
+                <span style={eyebrow()}>Abishek&apos;s Tattoo Ink</span>
               </div>
             </Reveal>
 
-            <Reveal delay={0.08}>
+            <Reveal delay={0.08} variant="heading">
               <h2
                 style={{
                   fontFamily: SERIF,
@@ -232,7 +234,7 @@ export default function BrandStatement() {
               </h2>
             </Reveal>
 
-            <Reveal delay={0.16}>
+            <Reveal delay={0.16} variant="body">
               <p
                 style={{
                   fontFamily: SANS,
@@ -244,7 +246,7 @@ export default function BrandStatement() {
                   textShadow: "0 1px 16px rgba(0,0,0,0.5)",
                 }}
               >
-                Teyung Tattoo Ink is built on a simple belief — that a tattoo is
+                Abishek Tattoo Ink is built on a simple belief — that a tattoo is
                 a decision worth honouring. Step inside and you&apos;ll feel it:
                 Kathmandu&apos;s living heritage sitting easily beside raw,
                 contemporary expression — exactly how we work, and exactly how
@@ -252,7 +254,7 @@ export default function BrandStatement() {
               </p>
             </Reveal>
 
-            <Reveal delay={0.24}>
+            <Reveal delay={0.24} variant="stat">
               <div
                 style={{
                   display: "flex",
@@ -282,7 +284,7 @@ export default function BrandStatement() {
                         textShadow: "0 1px 14px rgba(0,0,0,0.55)",
                       }}
                     >
-                      {p.mark}
+                      <CountUp value={p.mark} />
                     </span>
                     <span
                       style={{
@@ -316,8 +318,25 @@ export default function BrandStatement() {
             </Reveal>
 
             <Reveal delay={0.36}>
-              <a
-                href="/concept-3"
+              {/* B3 — CTA now answers the pointer: border + fill brighten and the
+                  arrow nudges on hover (variant propagates parent → arrow). */}
+              <motion.a
+                href="/#contact"
+                initial="rest"
+                whileHover="hover"
+                whileTap="tap"
+                variants={{
+                  rest: {
+                    backgroundColor: "rgba(203,164,90,0.1)",
+                    borderColor: "rgba(203,164,90,0.55)",
+                  },
+                  hover: {
+                    backgroundColor: "rgba(203,164,90,0.22)",
+                    borderColor: "rgba(203,164,90,0.9)",
+                  },
+                  tap: { scale: 0.98 },
+                }}
+                transition={{ duration: 0.25, ease: [0.4, 0, 0.2, 1] }}
                 style={{
                   display: "inline-flex",
                   alignItems: "center",
@@ -328,8 +347,8 @@ export default function BrandStatement() {
                   fontSize: "0.78rem",
                   fontWeight: 600,
                   color: COLORS.gold,
-                  background: "rgba(203,164,90,0.1)",
-                  border: `1px solid rgba(203,164,90,0.55)`,
+                  borderWidth: 1,
+                  borderStyle: "solid",
                   padding: "1rem 1.8rem",
                   borderRadius: 999,
                   textDecoration: "none",
@@ -339,8 +358,14 @@ export default function BrandStatement() {
                 }}
               >
                 Get studio tour
-                <span aria-hidden style={{ fontSize: "0.9rem" }}>↗</span>
-              </a>
+                <motion.span
+                  aria-hidden
+                  variants={{ hover: { x: 4 } }}
+                  style={{ fontSize: "0.9rem" }}
+                >
+                  ↗
+                </motion.span>
+              </motion.a>
             </Reveal>
           </div>
         </div>

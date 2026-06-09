@@ -28,7 +28,7 @@ const ITEMS = [
   },
 ];
 
-export default function WhyTeyung() {
+export default function WhyAbishek() {
   return (
     <section
       style={{
@@ -38,7 +38,7 @@ export default function WhyTeyung() {
     >
       <div style={{ maxWidth: 1200, margin: "0 auto" }}>
         <Reveal>
-          <div style={{ ...eyebrow(), marginBottom: "1.2rem" }}>Why Teyung</div>
+          <div style={{ ...eyebrow(), marginBottom: "1.2rem" }}>Why Abishek</div>
         </Reveal>
         <Reveal delay={0.06}>
           <h2

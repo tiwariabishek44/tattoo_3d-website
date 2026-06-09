@@ -1,10 +1,10 @@
-import { SANS, COLORS } from "@/lib/theme";
+import { SANS, COLORS, BOOKING_HREF } from "@/lib/theme";
 
 // Persistent CTA — fixed, visible through the whole scroll.
 export default function BookButton() {
   return (
     <a
-      href="#book"
+      href={BOOKING_HREF}
       style={{
         position: "fixed",
         bottom: "clamp(44px, 7vh, 80px)",

@@ -28,7 +28,7 @@ type Beat = {
 // 3 beats over a R→L→R motion (LEGS = 2). Machine: R at p=0, L at p=0.5, R at p=1.
 const BEATS: Beat[] = [
   {
-    eyebrow: "TEYUNG TATTOO INK",
+    eyebrow: "Abishek TATTOO INK",
     headline: "Permanence is a craft.",
     support:
       "A tattoo outlives the moment it's made. We treat every one exactly that way — considered, deliberate, built to last a lifetime.",

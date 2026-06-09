@@ -3,7 +3,7 @@
 > A grounded, scroll-driven story: a man in a **zipped-up hoodie** → the hoodie **unzips
 > downward and falls open**, revealing his bare chest with a **spider tattoo** → then the
 > spider **lifts off the skin, crawls left, and vanishes.** The "your ink is alive" moment
-> for Teyung Tattoo Ink.
+> for Abishek Tattoo Ink.
 >
 > **Operating rule:** before generating any prompt, read [prompt-architecture.md](prompt-architecture.md)
 > + [findings-log.md](findings-log.md). Build as chunked beats (Science §11). Scrub-test every seam.
@@ -88,7 +88,7 @@ as a record / a seed for a future *darker* concept ("your ink has a mind of its 
 - [ ] Consistent **spider design** carried through Beat 3.
 
 ## Where it lives
-A dedicated **scroll-scrub story section** on the Teyung page ("the art lives" feature) — or a standalone showcase. *(Decide before web integration; the asset is built the same either way.)*
+A dedicated **scroll-scrub story section** on the Abishek page ("the art lives" feature) — or a standalone showcase. *(Decide before web integration; the asset is built the same either way.)*
 
 ## Open decisions
 - [ ] Anchor abdomen: keep solid black, or regenerate with the reference's white marking?
