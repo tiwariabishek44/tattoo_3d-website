@@ -12,6 +12,8 @@ export const HERO_VH = 600;   // ScrollSequence — scroll-scrubbed video + two-
 export const BRAND_VH = 210;  // BrandStatement — reveal now live across the pinned hold (full-range offset)
 export const SPIDER_VH = 780; // SpiderSequence — trimmed edge holds; active scrub px/frame ~preserved
 export const SERVICE_VH = 200; // ServiceSlider — shorter dead click-driven pin zone
+// reviews-fullscreen-parallax-plan.md — retired pinned design. Section flows naturally.
+export const REVIEWS_VH = 0; // Testimonials — retired (flows naturally)
 
 // Documentation-only — these sections size from content/floors, not a fixed
 // scroll-track, so there's no single constant to centralize.
@@ -73,7 +75,7 @@ export const SCROLL_BUDGET: SectionBudget[] = [
     depthLayers: 1,
     notes: "E-20 depth pass deferred — complex modal ('Jinn eruption') system, needs human visual pass",
   },
-  { name: "Testimonials", vh: null, sticky: false, mechanism: "raw useTransform parallax (useParallax)", depthLayers: 2 },
+  { name: "Testimonials", vh: null, sticky: false, mechanism: "natural vertical flow (sequential sections)", depthLayers: 1 },
   { name: "BookingCTA", vh: null, sticky: false, mechanism: "whileInView (Reveal)", depthLayers: 1 },
   { name: "Footer", vh: null, sticky: false, mechanism: "static", depthLayers: 1 },
 ];

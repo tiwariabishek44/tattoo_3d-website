@@ -52,8 +52,14 @@ export default function SmoothScroll({ children }: { children: React.ReactNode }
         // beats this. Only pixel-mode (deltaMode === 0) input is ambiguous.
         const allLineMode = wheelHistory.every((h) => h.mode === 1);
 
+        // ONE canonical pace — the mouse's buttery, deliberate glide — imposed on
+        // every device. The classifier no longer gives the trackpad a "native"
+        // snappy feel (that read as too FAST); instead it pulls the trackpad toward
+        // the mouse: a heavy lerp PLUS a dampened wheelMultiplier so a momentum
+        // flick travels a deliberate distance, not a fling through the story.
         if (allLineMode) {
-          targetLerp = 0.08; // Heavy smoothing for discrete wheel clicks
+          targetLerp = 0.08;                       // classic mouse wheel — the gold feel
+          lenis.options.wheelMultiplier = 1.0;
         } else {
           // Pixel-mode stream — disambiguate trackpad from a free-spin/precision
           // mouse (which also reports pixel deltas) via the delta/timing signature.
@@ -75,9 +81,11 @@ export default function SmoothScroll({ children }: { children: React.ReactNode }
           const isTrackpad = hasFractional || (allVerySmall && isHighFrequency);
 
           if (isTrackpad) {
-            targetLerp = 0.28; // Responsive/snappy response to trackpad native decay
+            targetLerp = 0.12;                     // glide like the mouse (was 0.28 = too fast/light)
+            lenis.options.wheelMultiplier = 0.65;  // dampen momentum over-travel → deliberate pace
           } else {
-            targetLerp = 0.08; // Free-spin/precision mouse — treat as a wheel, not loose
+            targetLerp = 0.08;                     // free-spin/precision mouse — treat as a wheel
+            lenis.options.wheelMultiplier = 1.0;
           }
         }
       }

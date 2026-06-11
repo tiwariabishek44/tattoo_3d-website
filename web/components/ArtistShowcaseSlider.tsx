@@ -351,23 +351,13 @@ export default function ArtistShowcaseSlider() {
               fontSize: "clamp(1.25rem, 1.9vw, 1.65rem)",
               lineHeight: 1.5,
               color: COLORS.offWhite,
-              margin: "1.6rem 0 2.2rem",
+              margin: "1.6rem 0 0",
               maxWidth: "42ch",
               textShadow: "0 1px 20px rgba(0,0,0,0.45)",
             }}
           >
             &ldquo;{a.quote}&rdquo;
           </p>
-
-          <div style={{ display: "flex", gap: 16, flexWrap: "wrap" }}>
-            <button style={btnSolid} onClick={() => openStory(active)}>VIEW STORY</button>
-            <button style={btnOutline}>BOOK A SESSION</button>
-          </div>
-        </div>
-
-        <div style={{ display: "flex", gap: 14, marginTop: "clamp(2rem, 5vh, 3.5rem)" }}>
-          <button aria-label="Previous artist" onClick={() => go(-1)} style={arrow}>‹</button>
-          <button aria-label="Next artist" onClick={() => go(1)} style={arrow}>›</button>
         </div>
       </div>
 
@@ -378,10 +368,11 @@ export default function ArtistShowcaseSlider() {
           position: "absolute",
           zIndex: 7,
           top: compact ? 92 : (medium ? "clamp(100px, 12vh, 140px)" : "clamp(108px, 14vh, 164px)"),
+          bottom: compact ? 16 : (medium ? 20 : GUTTER),
           right: compact ? 16 : GUTTER,
           display: "grid",
           gridTemplateColumns: `repeat(2, ${tileW})`,
-          gridAutoRows: tileH,
+          gridTemplateRows: "1fr 1fr",
           gap: compact ? 12 : (medium ? 14 : 20),
           pointerEvents: "auto",
         }}
@@ -705,6 +696,7 @@ export default function ArtistShowcaseSlider() {
               <motion.div
                 key={storyIdx}
                 onClick={(e) => e.stopPropagation()}
+                data-lenis-prevent
                 // No competing transform here on the way out. `scale` would
                 // create its own projection node and fight the portrait's
                 // layoutId FLIP for the same transform budget — Framer
@@ -983,6 +975,7 @@ export default function ArtistShowcaseSlider() {
                 <div
                   ref={galleryScrollRef}
                   className="story-gallery-scroll"
+                  data-lenis-prevent
                   style={{
                     width: "100%",
                     height: "100%",
@@ -1128,46 +1121,7 @@ export default function ArtistShowcaseSlider() {
   );
 }
 
-const btnSolid: React.CSSProperties = {
-  fontFamily: "var(--font-inter), sans-serif",
-  fontWeight: 700,
-  letterSpacing: "0.12em",
-  fontSize: "0.82rem",
-  color: "#111",
-  background: "#fff",
-  border: "none",
-  padding: "16px 30px",
-  borderRadius: 4,
-  cursor: "pointer",
-};
 
-const btnOutline: React.CSSProperties = {
-  fontFamily: "var(--font-inter), sans-serif",
-  fontWeight: 700,
-  letterSpacing: "0.12em",
-  fontSize: "0.82rem",
-  color: "#fff",
-  background: "transparent",
-  border: "1.5px solid rgba(255,255,255,0.55)",
-  padding: "16px 30px",
-  borderRadius: 4,
-  cursor: "pointer",
-};
-
-const arrow: React.CSSProperties = {
-  width: 52,
-  height: 52,
-  borderRadius: "50%",
-  border: "1px solid rgba(255,255,255,0.45)",
-  background: "rgba(255,255,255,0.04)",
-  color: "#fff",
-  fontSize: "1.5rem",
-  lineHeight: 1,
-  cursor: "pointer",
-  display: "flex",
-  alignItems: "center",
-  justifyContent: "center",
-};
 
 const circleBtn: React.CSSProperties = {
   width: 62,

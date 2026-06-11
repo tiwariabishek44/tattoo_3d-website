@@ -10,8 +10,15 @@ export function useScrollLock(locked: boolean) {
   useEffect(() => {
     if (!locked) return;
     document.body.style.overflow = "hidden";
+    const lenis = (window as any).lenis;
+    if (lenis) {
+      lenis.stop();
+    }
     return () => {
       document.body.style.overflow = "";
+      if (lenis) {
+        lenis.start();
+      }
     };
   }, [locked]);
 }

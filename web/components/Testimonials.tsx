@@ -2,12 +2,9 @@
 
 import { useEffect, useRef, useState } from "react";
 import {
-  motion, AnimatePresence, LayoutGroup,
-  useScroll, useAnimation,
+  motion, AnimatePresence, LayoutGroup, useAnimation,
 } from "framer-motion";
 import { SERIF, SANS, COLORS, eyebrow, GUTTER } from "@/lib/theme";
-import { useParallax } from "@/lib/useParallax";
-import { PARALLAX_MID } from "@/lib/motionTokens";
 import { useScrollLock } from "@/lib/useScrollLock";
 import { useReducedMotionSafe } from "@/lib/useReducedMotionSafe";
 
@@ -223,6 +220,7 @@ function DetailModal({ review, lampId, onClose }: {
       {/* outer shell — no competing transform */}
       <div
         onClick={(e) => e.stopPropagation()}
+        data-lenis-prevent
         style={{
           position: "relative",
           zIndex: 305,
@@ -406,8 +404,9 @@ function Card({ r, lampId, selectedLampId, onOpen, compact }: {
           fontFamily: SERIF,
           fontStyle: "italic",
           fontWeight: 500,
-          fontSize: "clamp(1rem, 1.3vw, 1.16rem)",
-          lineHeight: 1.55,
+          fontSize: "clamp(1.16rem, 1.55vw, 1.4rem)",
+          lineHeight: 1.5,
+          letterSpacing: "0.004em",
           color: COLORS.inkText,
           margin: 0,
           display: "-webkit-box",
@@ -459,12 +458,12 @@ function Card({ r, lampId, selectedLampId, onOpen, compact }: {
             transition={{ duration: 0.16 }}
             style={{
               position: "absolute", inset: 0, borderRadius: 20, zIndex: 2,
-              background: "rgba(7,6,5,0.74)",
+              background: "rgba(7,6,5,0.37)", // ~50% of the original 0.74 — a light veil, not a blackout
               display: "flex", alignItems: "center", justifyContent: "center",
               pointerEvents: "none",
             }}
           >
-            <span style={{ fontFamily: SANS, fontSize: "0.78rem", fontWeight: 600, letterSpacing: "0.16em", textTransform: "uppercase", color: COLORS.gold, border: "1px solid rgba(203,164,90,0.55)", borderRadius: 100, padding: "10px 24px" }}>
+            <span style={{ fontFamily: SANS, fontSize: "0.74rem", fontWeight: 600, letterSpacing: "0.16em", textTransform: "uppercase", color: COLORS.charcoal, background: COLORS.gold, borderRadius: 100, padding: "10px 24px", boxShadow: "0 8px 24px rgba(27,22,15,0.22)" }}>
               See details
             </span>
           </motion.div>
@@ -535,19 +534,20 @@ function MarqueeRow({ items, rowKey, reverse, duration, selectedLampId, paused, 
 export default function Testimonials() {
   const [selected, setSelected] = useState<{ review: Review; lampId: string } | null>(null);
   const compact = useCompact();
-  const sectionRef = useRef<HTMLElement>(null);
-  const { scrollYProgress } = useScroll({
-    target: sectionRef,
-    offset: ["start end", "end start"],
-  });
-
   const reduced = useReducedMotionSafe();
+  const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
 
-  // E-19 — counter-moving label/sheet pair on the midground plane (1.0x),
-  // opposite directions via the sign of the rate. Ranges chosen so
-  // range * rate reproduces the original ∓195 travel.
-  const labelY = useParallax(scrollYProgress, -PARALLAX_MID, reduced ? 0 : 195);
-  const sheetY = useParallax(scrollYProgress, PARALLAX_MID, reduced ? 0 : 195);
+  const handleMouseMove = (e: React.MouseEvent<HTMLElement>) => {
+    if (reduced) return;
+    const rect = e.currentTarget.getBoundingClientRect();
+    const x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
+    const y = ((e.clientY - rect.top) / rect.height) * 2 - 1;
+    setMousePos({ x, y });
+  };
+
+  const handleMouseLeave = () => {
+    setMousePos({ x: 0, y: 0 });
+  };
 
   const paused = selected !== null;
   const selectedLampId = selected?.lampId ?? null;
@@ -555,7 +555,7 @@ export default function Testimonials() {
 
   return (
     <LayoutGroup id="testimonials">
-      <>
+      <div id="testimonials">
         <AnimatePresence>
           {selected && (
             <DetailModal
@@ -567,53 +567,119 @@ export default function Testimonials() {
           )}
         </AnimatePresence>
 
+        {/* Section 1: "Where Review Matters" + Stats (Full Screen Cover) */}
         <section
-          ref={sectionRef}
-          style={{ background: "#fafafa", padding: `clamp(80px, 12vh, 140px) ${GUTTER}` }}
+          onMouseMove={handleMouseMove}
+          onMouseLeave={handleMouseLeave}
+          style={{
+            position: "relative",
+            background: "#fafafa",
+            minHeight: "100vh",
+            padding: `clamp(40px, 6vh, 80px) ${GUTTER}`,
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            justifyContent: "center",
+            boxSizing: "border-box",
+            overflow: "hidden",
+          }}
         >
-          <motion.div
+          <div
             style={{
-              y: labelY,
               maxWidth: "min(1600px, 100vw)",
-              margin: `clamp(48px, 8vh, 96px) auto clamp(56px, 9vh, 110px)`,
+              margin: "0 auto",
               textAlign: "center",
             }}
           >
-            <div style={{ ...eyebrow(COLORS.gold), marginBottom: "1.2rem" }}>In their words</div>
-            <h2 style={{ fontFamily: SANS, fontWeight: 800, fontSize: "clamp(3.6rem, 9.5vw, 9rem)", lineHeight: 1.02, letterSpacing: "-0.03em", color: COLORS.ink, margin: 0 }}>
-              <span style={{ display: "block" }}>Where Review</span>
-              <span style={{ display: "block" }}>Matters</span>
+            <div
+              style={{
+                ...eyebrow(COLORS.gold),
+                marginBottom: "0.9rem",
+                transform: `translate3d(${mousePos.x * 12}px, ${mousePos.y * 12}px, 0)`,
+                transition: "transform 0.6s cubic-bezier(0.16, 1, 0.3, 1)",
+              }}
+            >
+              In their words
+            </div>
+            <h2
+              style={{
+                fontFamily: SANS,
+                fontWeight: 800,
+                fontSize: "clamp(3.2rem, 7.5vw, 8rem)",
+                lineHeight: 1.04,
+                letterSpacing: "-0.03em",
+                color: COLORS.ink,
+                margin: 0,
+                transform: `translate3d(${mousePos.x * 32}px, ${mousePos.y * 32}px, 0) rotate(${mousePos.x * 2.5}deg)`,
+                transition: "transform 0.6s cubic-bezier(0.16, 1, 0.3, 1)",
+              }}
+            >
+              Where Review Matters
             </h2>
-          </motion.div>
+            {/* proof-stat row */}
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "center",
+                gap: "clamp(28px, 5vw, 72px)",
+                marginTop: "clamp(18px, 2.6vh, 32px)",
+                flexWrap: "wrap",
+                transform: `translate3d(${mousePos.x * 20}px, ${mousePos.y * 20}px, 0)`,
+                transition: "transform 0.6s cubic-bezier(0.16, 1, 0.3, 1)",
+              }}
+            >
+              {[
+                { v: "4.9★", l: "Average rating" },
+                { v: "500+", l: "Pieces inked" },
+                { v: "8", l: "Countries traveled" },
+              ].map((s) => (
+                <div key={s.l} style={{ textAlign: "center" }}>
+                  <div style={{ fontFamily: SERIF, fontWeight: 600, fontSize: "clamp(1.5rem, 2.4vw, 2.4rem)", lineHeight: 1, color: COLORS.gold }}>{s.v}</div>
+                  <div style={{ fontFamily: SANS, fontSize: "0.7rem", fontWeight: 600, letterSpacing: "0.16em", textTransform: "uppercase", color: COLORS.mutedDark, marginTop: "0.45rem" }}>{s.l}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
 
-          <motion.div
+        {/* Section 2: Review sheet on white background (Full Screen Cover) */}
+        <section
+          style={{
+            position: "relative",
+            background: "#ffffff",
+            minHeight: "100vh",
+            padding: `clamp(40px, 6vh, 80px) ${GUTTER}`,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            boxSizing: "border-box",
+          }}
+        >
+          <div
             style={{
-              y: sheetY,
               width: "100%",
-              margin: "clamp(40px, 6vh, 64px) auto 0",
+              maxWidth: "min(1600px, 100vw)",
+              margin: "0 auto",
+              display: "flex",
+              alignItems: "center",
               background: "rgba(7,6,5,0.66)",
               backdropFilter: "blur(22px) saturate(140%)",
               WebkitBackdropFilter: "blur(22px) saturate(140%)",
               border: "1px solid rgba(255,255,255,0.08)",
               boxShadow: "0 30px 100px rgba(0,0,0,0.25)",
-              borderRadius: "clamp(28px, 3.4vw, 44px)",
-              padding: `clamp(56px, 9vh, 110px) 0`,
+              borderRadius: "clamp(24px, 3vw, 40px)",
+              padding: `clamp(28px, 4vh, 52px) 0`,
               overflow: "hidden",
             }}
           >
-            <div style={{ padding: `0 ${GUTTER}` }}>
-              <p style={{ fontFamily: SANS, fontSize: "clamp(1.05rem, 1.4vw, 1.3rem)", lineHeight: 1.6, color: COLORS.muted, margin: 0, maxWidth: "54ch" }}>
-                Real people, real marks — straight from the Teyung chair.
-              </p>
-            </div>
-            <div style={{ marginTop: "clamp(40px, 6vh, 64px)", display: "flex", flexDirection: "column", gap: 24 }}>
+            <div style={{ width: "100%", display: "flex", flexDirection: "column", gap: "clamp(14px, 2vh, 22px)" }}>
               <MarqueeRow items={ROW_A} rowKey="a" reverse={false} duration={48} selectedLampId={selectedLampId} paused={paused} reduced={reduced} onOpen={handleOpen} compact={compact} />
               <MarqueeRow items={ROW_B} rowKey="b" reverse={true}  duration={56} selectedLampId={selectedLampId} paused={paused} reduced={reduced} onOpen={handleOpen} compact={compact} />
               <MarqueeRow items={ROW_C} rowKey="c" reverse={false} duration={64} selectedLampId={selectedLampId} paused={paused} reduced={reduced} onOpen={handleOpen} compact={compact} />
             </div>
-          </motion.div>
+          </div>
         </section>
-      </>
+      </div>
     </LayoutGroup>
   );
 }

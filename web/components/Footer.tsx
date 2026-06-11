@@ -1,12 +1,20 @@
-// Footer — concept-1 visual DNA: tagline + link columns + giant gold wordmark + bottom strip.
+// Footer — the site closes in the dark: an ink panel with the giant brand wordmark
+// glowing in gold. Chosen over the light/oxblood concept so the whole experience
+// stays in one premium mood from hero to footer.
 
 import { BOOKING_HREF } from "@/lib/theme";
 
 const SANS = "var(--font-inter), system-ui, sans-serif";
 const SERIF = "var(--font-cormorant), Georgia, serif";
-const GOLD = "#CBA45A";
 const SIDE = "clamp(24px, 4.7vw, 90px)";
 const IG_URL = "https://instagram.com/Abishek.ink";
+
+const INK     = "#0B0907";
+const GOLD    = "#CBA45A";
+const GLOW    = "drop-shadow(0 0 22px rgba(203,164,90,0.34))";
+const LINK    = "rgba(242,239,233,0.70)";
+const MUTED   = "rgba(242,239,233,0.40)";
+const DIVIDER = "rgba(203,164,90,0.28)";
 
 const COL1: { label: string; href: string }[] = [
   { label: "Home",       href: "/#top" },
@@ -26,7 +34,7 @@ const BOTTOM = ["After Care", "Instagram", "Contact"];
 
 const linkStyle: React.CSSProperties = {
   display: "block",
-  color: "rgba(27,22,15,0.72)",
+  color: LINK,
   textDecoration: "none",
   fontSize: "1rem",
   fontWeight: 500,
@@ -39,8 +47,8 @@ export default function Footer() {
     <footer
       id="contact"
       style={{
-        background: "#fafafa",
-        color: "#1B160F",
+        background: INK,
+        color: LINK,
         padding: `clamp(72px, 12vh, 120px) ${SIDE} clamp(28px, 4vh, 52px)`,
         scrollMarginTop: "90px",
       }}
@@ -93,15 +101,15 @@ export default function Footer() {
         </div>
       </div>
 
-      {/* ── Giant gold wordmark ── */}
+      {/* ── Giant gold wordmark (glowing) ── */}
       <div style={{ margin: "clamp(40px, 6vh, 84px) 0 clamp(48px, 8vh, 100px)" }}>
         <svg
           viewBox="0 0 1000 330"
-          width="100%"
-          height="auto"
           role="img"
           aria-label="Abishek Tattoo Ink"
-          style={{ display: "block" }}
+          // Responsive sizing via CSS (height:auto is valid in CSS — the old
+          // height="auto" *attribute* was the console error). viewBox holds ratio.
+          style={{ display: "block", width: "100%", height: "auto", filter: GLOW }}
         >
           <text
             x="0"
@@ -138,12 +146,12 @@ export default function Footer() {
           flexWrap: "wrap",
           gap: 16,
           paddingTop: "clamp(20px, 3vh, 32px)",
-          borderTop: "1px solid rgba(203,164,90,0.35)",
+          borderTop: `1px solid ${DIVIDER}`,
           fontSize: "0.78rem",
           fontFamily: SANS,
           textTransform: "uppercase",
           letterSpacing: "0.18em",
-          color: "rgba(27,22,15,0.42)",
+          color: MUTED,
         }}
       >
         <span>© 2026 Abishek Tattoo Ink · Thamel, Kathmandu</span>
@@ -157,7 +165,7 @@ export default function Footer() {
                 : "mailto:hello@Abishek.ink"
               }
               style={{
-                color: "rgba(27,22,15,0.42)",
+                color: MUTED,
                 textDecoration: "none",
                 fontFamily: SANS,
                 fontSize: "0.78rem",

@@ -23,8 +23,7 @@ export default function Home() {
       {/* Buddha unzip — the stats now fold into the end of this sequence
           (standalone StatsBand removed). */}
       <SpiderSequence embedded />
-      {/* Styles we master — featured-image slider (services). Reference animal
-          assets + colours for now; re-skin to tattoo + gold later. */}
+      {/* Styles we master — featured-image slider (services). */}
       <ServiceSlider />
       {/* Gallery — light/Pinterest skin (dark version retired). */}
       <GalleryPinterest theme="light" />
