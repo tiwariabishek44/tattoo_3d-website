@@ -1,6 +1,8 @@
 "use client";
 
 import { motion } from "framer-motion";
+import { EASE_ARRIVAL } from "@/lib/motionTokens";
+import { useReducedMotionSafe } from "@/lib/useReducedMotionSafe";
 
 // A4 — Reveal as a small FAMILY of intents, not one recipe applied everywhere.
 // The distance + duration vary by ROLE (so it reads authored, not templated);
@@ -13,7 +15,7 @@ import { motion } from "framer-motion";
 // An explicit `y`/`x` still overrides the preset.
 // SSOT: web/HOMEPAGE_FRAGRANCE_PLAN.md (A4).
 
-const EASE = [0.22, 1, 0.36, 1] as const;
+const EASE = EASE_ARRIVAL;
 
 type Variant = "default" | "heading" | "body" | "stat" | "rule";
 
@@ -40,15 +42,16 @@ export default function Reveal({
   variant?: Variant;
   style?: React.CSSProperties;
 }) {
+  const reduced = useReducedMotionSafe();
   const preset = PRESETS[variant];
-  const fromY = y ?? preset.y;
-  const fromX = x ?? preset.x;
+  const fromY = reduced ? 0 : y ?? preset.y;
+  const fromX = reduced ? 0 : x ?? preset.x;
   return (
     <motion.div
       initial={{ opacity: 0, y: fromY, x: fromX }}
       whileInView={{ opacity: 1, y: 0, x: 0 }}
       viewport={{ once: true, margin: "-80px" }}
-      transition={{ duration: preset.duration, delay, ease: EASE }}
+      transition={{ duration: reduced ? 0.2 : preset.duration, delay: reduced ? 0 : delay, ease: EASE }}
       style={style}
     >
       {children}

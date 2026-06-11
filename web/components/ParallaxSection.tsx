@@ -1,8 +1,11 @@
 "use client";
 
 import { useRef } from "react";
-import { motion, useScroll, useTransform, MotionValue } from "framer-motion";
-import { SERIF, SANS, COLORS, frame } from "@/lib/theme";
+import { motion, useScroll, MotionValue } from "framer-motion";
+import { SERIF, SANS, COLORS, frame, withAlpha } from "@/lib/theme";
+import { useParallax } from "@/lib/useParallax";
+import { PARALLAX_BG, PARALLAX_MID } from "@/lib/motionTokens";
+import { useReducedMotionSafe } from "@/lib/useReducedMotionSafe";
 
 // Placeholder gallery — frame images stand in for real tattoo work for now.
 const CARDS = [
@@ -17,14 +20,18 @@ function Card({
   img,
   speed,
   offset,
+  reduced,
 }: {
   progress: MotionValue<number>;
   label: string;
   img: string;
   speed: number;
   offset: number;
+  reduced: boolean;
 }) {
-  const y = useTransform(progress, [0, 1], [speed, -speed]);
+  // E-19 — cards are the midground "anchor" plane (Decision 2: 1.0x), each
+  // keeping its own authored range for depth-of-field variety.
+  const y = useParallax(progress, PARALLAX_MID, reduced ? 0 : speed);
   return (
     <motion.div
       style={{
@@ -32,9 +39,9 @@ function Card({
         marginTop: offset,
         width: "clamp(240px, 24vw, 360px)",
         aspectRatio: "3 / 4",
-        border: "1px solid rgba(203,164,90,0.4)",
+        border: `1px solid ${withAlpha(COLORS.gold, 0.4)}`,
         borderRadius: 4,
-        backgroundImage: `linear-gradient(to top, rgba(7,8,10,0.85) 0%, rgba(7,8,10,0.1) 55%), url(${img})`,
+        backgroundImage: `linear-gradient(to top, ${withAlpha(COLORS.ink, 0.85)} 0%, ${withAlpha(COLORS.ink, 0.1)} 55%), url(${img})`,
         backgroundSize: "cover",
         backgroundPosition: "center",
         display: "flex",
@@ -66,9 +73,13 @@ export default function ParallaxSection() {
     target: ref,
     offset: ["start end", "end start"],
   });
+  const reduced = useReducedMotionSafe();
 
-  const bgY = useTransform(scrollYProgress, [0, 1], [70, -70]);
-  const headY = useTransform(scrollYProgress, [0, 1], [40, -40]);
+  // E-19 — "Gallery" watermark sits on the background plane (0.5x); the
+  // heading block is the midground anchor (1.0x). Ranges chosen so
+  // range * rate reproduces the original ±70 / ±40 travel.
+  const bgY = useParallax(scrollYProgress, PARALLAX_BG, reduced ? 0 : 140);
+  const headY = useParallax(scrollYProgress, PARALLAX_MID, reduced ? 0 : 40);
 
   return (
     <section
@@ -91,7 +102,7 @@ export default function ParallaxSection() {
           fontFamily: SERIF,
           fontWeight: 500,
           fontSize: "clamp(8rem, 26vw, 26rem)",
-          color: "rgba(203,164,90,0.06)",
+          color: withAlpha(COLORS.gold, 0.06),
           whiteSpace: "nowrap",
           pointerEvents: "none",
           userSelect: "none",
@@ -147,7 +158,7 @@ export default function ParallaxSection() {
         }}
       >
         {CARDS.map((c) => (
-          <Card key={c.label} progress={scrollYProgress} {...c} />
+          <Card key={c.label} progress={scrollYProgress} reduced={reduced} {...c} />
         ))}
       </div>
     </section>

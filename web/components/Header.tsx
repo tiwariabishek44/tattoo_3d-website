@@ -6,8 +6,7 @@ import { usePathname } from "next/navigation";
 const SANS = "var(--font-inter), system-ui, sans-serif";
 // Real nav — every item lands somewhere honest. On-page items smooth-scroll to
 // their section anchor (IDs live on each section root); After Care is its own
-// minimal page. Sandbox routes (design-2 / concept-3/4/5) are intentionally
-// kept OUT of the public menu — dev-only.
+// minimal page.
 const NAV: { label: string; href: string }[] = [
   { label: "Home", href: "/#top" },
   { label: "About", href: "/#about" },
@@ -16,8 +15,6 @@ const NAV: { label: string; href: string }[] = [
   { label: "Artists", href: "/#artists" },
   { label: "After Care", href: "/after-care" },
   { label: "Contact", href: "/#contact" },
-  { label: "Concept 1", href: "/concept-1" },
-  { label: "Concept 2", href: "/concept-2" },
 ];
 
 export default function Header() {

@@ -14,7 +14,8 @@
 //     from the homepage Artists cards, not generic service blurb.
 import { useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence, LayoutGroup } from "framer-motion";
-import { SERIF, SANS, COLORS } from "@/lib/theme";
+import { SERIF, SANS, COLORS, GUTTER } from "@/lib/theme";
+import { useScrollLock } from "@/lib/useScrollLock";
 
 const STUDIO_IMG = "/studio_interior_2.jpg";
 
@@ -59,9 +60,9 @@ const ARTISTS: Artist[] = [
     quote: "Fine lines, told slowly — like a sentence worth finishing properly.",
     bio: "Trained across Kathmandu and Bangkok before settling into the Abishek chair, Tenzin works at a deliberately unhurried pace — a single-needle hand built for clients who want one piece told exactly right, not three told quickly.",
     stats: [
-      { value: "9+ Yrs", label: "Experience" },
-      { value: "650+", label: "Happy clients" },
-      { value: "1,200+", label: "Sessions inked" },
+      { value: "Single-Needle Custom", label: "Specialty" },
+      { value: "Kathmandu & Bangkok", label: "Training" },
+      { value: "Max 1 Client / Day", label: "Pacing" },
     ],
     portfolio: DUMMY_PORTFOLIO,
   },
@@ -72,9 +73,9 @@ const ARTISTS: Artist[] = [
     quote: "I turn scars into stories — that trade is the whole reason I do this.",
     bio: "Maya reads old ink the way a restorer reads a damaged painting — what to keep, what to let go, what the skin can still hold. Her cover-ups lean on patient color-matching and shading dense enough to bury the past for good.",
     stats: [
-      { value: "7+ Yrs", label: "Experience" },
-      { value: "520+", label: "Happy clients" },
-      { value: "300+", label: "Cover-ups done" },
+      { value: "Scar Restoration", label: "Specialty" },
+      { value: "Multi-Layer Realism", label: "Technique" },
+      { value: "Custom Tint-Matching", label: "Palette" },
     ],
     portfolio: DUMMY_PORTFOLIO,
   },
@@ -85,9 +86,9 @@ const ARTISTS: Artist[] = [
     quote: "Bold and permanent — I want it to still mean something in twenty years.",
     bio: "Two generations of traditional artists shaped Rohan's hand before Abishek did — saturated black, confident outlines, and a respect for how a piece ages on skin, not just how it photographs on the day it's finished.",
     stats: [
-      { value: "11+ Yrs", label: "Experience" },
-      { value: "800+", label: "Happy clients" },
-      { value: "200+", label: "Large-scale pieces" },
+      { value: "High-Saturated Blackwork", label: "Specialty" },
+      { value: "Second-Gen Traditional", label: "Lineage" },
+      { value: "Body-Contour Mapping", label: "Method" },
     ],
     portfolio: DUMMY_PORTFOLIO,
   },
@@ -98,9 +99,9 @@ const ARTISTS: Artist[] = [
     quote: "Heritage isn't a style to me — it's the hand I learned to draw with.",
     bio: "Every pattern Sita inks gets traced back to where it came from before it ever touches skin — ornamental work that carries real lineage, drawn freehand from research, not lifted off a reference board.",
     stats: [
-      { value: "6+ Yrs", label: "Experience" },
-      { value: "410+", label: "Happy clients" },
-      { value: "350+", label: "Custom designs" },
+      { value: "Ornamental Lineage", label: "Specialty" },
+      { value: "Freehand Custom Draft", label: "Process" },
+      { value: "Nepali Stone Carvings", label: "Inspiration" },
     ],
     portfolio: DUMMY_PORTFOLIO,
   },
@@ -116,6 +117,17 @@ function useCompact() {
     return () => window.removeEventListener("resize", f);
   }, []);
   return c;
+}
+
+function useMedium() {
+  const [m, setM] = useState(false);
+  useEffect(() => {
+    const f = () => setM(window.innerWidth > 820 && window.innerWidth <= 1240);
+    f();
+    window.addEventListener("resize", f);
+    return () => window.removeEventListener("resize", f);
+  }, []);
+  return m;
 }
 
 // dynamic column count for the story-overlay gallery — same responsive
@@ -184,6 +196,7 @@ export default function ArtistShowcaseSlider() {
     setClosing(false);
   }, [storyIdx]);
   const compact = useCompact();
+  const medium = useMedium();
   const galleryCols = useGalleryCols();
   const a = ARTISTS[active];
   const go = (dir: number) => setActive((active + dir + N) % N);
@@ -220,19 +233,12 @@ export default function ArtistShowcaseSlider() {
     return () => window.removeEventListener("keydown", onKey);
   }, [storyIdx, closing]);
 
-  // lock page scroll while the story overlay is open — same as the gallery lightbox
-  useEffect(() => {
-    if (storyIdx === null) {
-      document.body.style.overflow = "";
-      return;
-    }
-    document.body.style.overflow = "hidden";
-    return () => { document.body.style.overflow = ""; };
-  }, [storyIdx]);
+  // lock page scroll while the story overlay is open (D-16)
+  useScrollLock(storyIdx !== null);
 
   // big cards — the wall IS the showcase now, not a sidebar strip
-  const tileW = compact ? "clamp(132px, 36vw, 168px)" : "clamp(218px, 17vw, 274px)";
-  const tileH = compact ? "clamp(168px, 46vw, 212px)" : "clamp(266px, 21vw, 338px)";
+  const tileW = compact ? "clamp(132px, 36vw, 168px)" : (medium ? "clamp(160px, 14vw, 200px)" : "clamp(218px, 17vw, 274px)");
+  const tileH = compact ? "clamp(168px, 46vw, 212px)" : (medium ? "clamp(200px, 18vw, 250px)" : "clamp(266px, 21vw, 338px)");
 
   return (
     <LayoutGroup>
@@ -275,19 +281,23 @@ export default function ArtistShowcaseSlider() {
         }}
       />
 
-      {/* content — left rail. Swaps directly on click, no fade choreography. */}
-      <div
-        style={{
-          position: "relative",
-          zIndex: 6,
-          height: "100%",
-          display: "flex",
-          flexDirection: "column",
-          justifyContent: "center",
-          padding: "0 clamp(28px, 6vw, 110px)",
-        }}
-      >
-        <div key={active} style={{ maxWidth: compact ? "100%" : "min(680px, 56%)" }}>
+        {/* content — left rail. Swaps directly on click, no fade choreography. */}
+        <div
+          style={{
+            position: "absolute",
+            left: 0,
+            top: 0,
+            bottom: 0,
+            width: "100%",
+            zIndex: 6,
+            display: "flex",
+            flexDirection: "column",
+            justifyContent: "center",
+            padding: `0 ${GUTTER}`,
+            pointerEvents: "auto",
+          }}
+        >
+        <div key={active} style={{ maxWidth: compact ? "100%" : (medium ? "min(480px, 44%)" : "min(680px, 56%)") }}>
           <div
             style={{
               fontFamily: SERIF,
@@ -367,12 +377,13 @@ export default function ArtistShowcaseSlider() {
         style={{
           position: "absolute",
           zIndex: 7,
-          top: compact ? 92 : "clamp(108px, 14vh, 164px)",
-          right: compact ? 16 : "clamp(80px, 11vw, 168px)",
+          top: compact ? 92 : (medium ? "clamp(100px, 12vh, 140px)" : "clamp(108px, 14vh, 164px)"),
+          right: compact ? 16 : GUTTER,
           display: "grid",
           gridTemplateColumns: `repeat(2, ${tileW})`,
           gridAutoRows: tileH,
-          gap: compact ? 12 : 20,
+          gap: compact ? 12 : (medium ? 14 : 20),
+          pointerEvents: "auto",
         }}
       >
         {ARTISTS.map((t, idx) => {
@@ -440,7 +451,7 @@ export default function ArtistShowcaseSlider() {
                 overflow: "hidden",
                 cursor: "pointer",
                 padding: 0,
-                border: "3px solid rgba(255,255,255,0.7)",
+                border: isActive ? `3px solid ${COLORS.gold}` : "2px solid rgba(255,255,255,0.25)",
                 boxShadow: isActive
                   ? "0 24px 60px rgba(0,0,0,0.55), 0 0 0 1px rgba(255,255,255,0.3)"
                   : "0 20px 50px rgba(0,0,0,0.45)",
@@ -529,7 +540,7 @@ export default function ArtistShowcaseSlider() {
                     fontFamily: SERIF,
                     color: "#fff",
                     fontWeight: 500,
-                    fontSize: compact ? "0.92rem" : "1.18rem",
+                    fontSize: compact ? "0.92rem" : (medium ? "1.02rem" : "1.18rem"),
                     lineHeight: 1.2,
                   }}
                 >
@@ -539,7 +550,7 @@ export default function ArtistShowcaseSlider() {
                   style={{
                     fontFamily: SANS,
                     color: isActive ? "#fff" : "rgba(255,255,255,0.62)",
-                    fontSize: compact ? "0.64rem" : "0.74rem",
+                    fontSize: compact ? "0.64rem" : (medium ? "0.68rem" : "0.74rem"),
                     marginTop: 4,
                     textTransform: "uppercase",
                     letterSpacing: "0.1em",
@@ -854,11 +865,12 @@ export default function ArtistShowcaseSlider() {
                         fontFamily: SERIF,
                         fontStyle: "italic",
                         fontWeight: 500,
-                        fontSize: "clamp(1rem, 1.5vw, 1.18rem)",
-                        lineHeight: 1.55,
+                        fontSize: "clamp(1rem, 1.4vw, 1.25rem)",
+                        lineHeight: 1.5,
                         color: COLORS.inkText,
-                        opacity: 0.82,
-                        margin: 0,
+                        borderLeft: `2.5px solid ${COLORS.gold}`,
+                        paddingLeft: "1.1rem",
+                        margin: "1.25rem 0",
                       }}
                     >
                       &ldquo;{ARTISTS[storyIdx].quote}&rdquo;
@@ -878,53 +890,60 @@ export default function ArtistShowcaseSlider() {
                       style={{
                         fontFamily: SANS,
                         fontWeight: 400,
-                        fontSize: "1.06rem",
-                        lineHeight: 1.72,
+                        fontSize: "0.98rem",
+                        lineHeight: 1.65,
                         color: COLORS.inkText,
-                        opacity: 0.84,
+                        opacity: 0.8,
                         margin: 0,
                       }}
                     >
                       {ARTISTS[storyIdx].bio}
                     </p>
 
-                    {/* stat row — experience / clients / craft record */}
+                    {/* spec list — curated, custom metadata */}
                     <div
                       style={{
                         display: "flex",
-                        gap: compact ? "1.1rem" : "1.6rem",
-                        marginTop: "1.4rem",
+                        flexDirection: "column",
+                        gap: 12,
+                        marginTop: "1.5rem",
                         paddingTop: "1.2rem",
                         borderTop: "1px solid rgba(27,22,15,0.1)",
                       }}
                     >
                       {ARTISTS[storyIdx].stats.map((s) => (
-                        <div key={s.label} style={{ flex: 1, minWidth: 0 }}>
-                          <div
-                            style={{
-                              fontFamily: SERIF,
-                              fontWeight: 600,
-                              fontSize: "clamp(1.18rem, 1.9vw, 1.5rem)",
-                              lineHeight: 1.1,
-                              color: COLORS.gold,
-                              marginBottom: "0.3rem",
-                            }}
-                          >
-                            {s.value}
-                          </div>
-                          <div
+                        <div
+                          key={s.label}
+                          style={{
+                            display: "flex",
+                            justifyContent: "space-between",
+                            alignItems: "baseline",
+                            gap: 16,
+                          }}
+                        >
+                          <span
                             style={{
                               fontFamily: SANS,
                               fontWeight: 600,
-                              fontSize: "0.76rem",
-                              letterSpacing: "0.1em",
+                              fontSize: "0.72rem",
+                              letterSpacing: "0.14em",
                               textTransform: "uppercase",
-                              color: COLORS.inkText,
-                              opacity: 0.62,
+                              color: COLORS.gold,
                             }}
                           >
                             {s.label}
-                          </div>
+                          </span>
+                          <span
+                            style={{
+                              fontFamily: SERIF,
+                              fontWeight: 500,
+                              fontSize: "1.06rem",
+                              color: COLORS.inkText,
+                              textAlign: "right",
+                            }}
+                          >
+                            {s.value}
+                          </span>
                         </div>
                       ))}
                     </div>
