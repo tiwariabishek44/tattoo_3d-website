@@ -35,7 +35,7 @@ const BEATS: Beat[] = [
   {
     eyebrow: "Abishek TATTOO INK",
     headline: "Beneath every layer.",
-    window: [0, 0.04, 0.22, 0.34],
+    window: [0, 0, 0.05, 0.15],
     startVisible: true,
   },
   {

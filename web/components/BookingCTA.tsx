@@ -9,10 +9,10 @@
 
 import { motion } from "framer-motion";
 import Reveal from "./Reveal";
-import { SERIF, SANS, COLORS, eyebrow, GUTTER, BOOKING_HREF } from "@/lib/theme";
+import { SERIF, SANS, COLORS, eyebrow, GUTTER, BOOKING_HREF, withAlpha } from "@/lib/theme";
+import { EASE_ARRIVAL, EASE_MECHANICAL } from "@/lib/motionTokens";
 
 const BG = "/crousal_images2/realism_tattoo1.jpeg"; // ink on skin — "your mark"
-const EASE = [0.22, 1, 0.36, 1] as const;
 
 export default function BookingCTA() {
   return (
@@ -32,7 +32,7 @@ export default function BookingCTA() {
         initial={{ scale: 1.14 }}
         whileInView={{ scale: 1 }}
         viewport={{ once: true, margin: "-80px" }}
-        transition={{ duration: 1.8, ease: EASE }}
+        transition={{ duration: 1.8, ease: EASE_ARRIVAL }}
         style={{
           position: "absolute",
           inset: "-4%",
@@ -48,7 +48,7 @@ export default function BookingCTA() {
           position: "absolute",
           inset: 0,
           background:
-            "linear-gradient(rgba(7,6,5,0.8), rgba(7,6,5,0.92)), radial-gradient(ellipse 70% 60% at 50% 50%, rgba(7,6,5,0) 0%, rgba(7,6,5,0.55) 100%)",
+            `linear-gradient(${withAlpha(COLORS.ink, 0.8)}, ${withAlpha(COLORS.ink, 0.92)}), radial-gradient(ellipse 70% 60% at 50% 50%, ${withAlpha(COLORS.ink, 0)} 0%, ${withAlpha(COLORS.ink, 0.55)} 100%)`,
         }}
       />
 
@@ -90,9 +90,9 @@ export default function BookingCTA() {
         <Reveal delay={0.24}>
           <motion.a
             href={BOOKING_HREF}
-            whileHover={{ scale: 1.04, boxShadow: "0 16px 50px rgba(203,164,90,0.4)" }}
+            whileHover={{ scale: 1.04, boxShadow: `0 16px 50px ${withAlpha(COLORS.gold, 0.4)}` }}
             whileTap={{ scale: 0.98 }}
-            transition={{ type: "tween", duration: 0.25, ease: EASE }}
+            transition={{ type: "tween", duration: 0.25, ease: EASE_MECHANICAL }}
             style={{
               display: "inline-block",
               marginTop: "2.6rem",

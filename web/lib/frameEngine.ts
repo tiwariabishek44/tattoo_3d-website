@@ -2,6 +2,12 @@
 // Runs identically on the main thread (HTMLCanvas) and inside a Web Worker
 // (OffscreenCanvas). Owns: windowed off-thread decode (createImageBitmap),
 // memory release (close), cover/contain draw, smoothing, idle loop.
+//
+// Performance tiers (setTier) degrade DECODE strategy only — smaller ensure
+// window, wider ensure step, cheaper smoothing quality. They never gate the
+// drawn frame (Law 2, scroll-engine-fix-plan.md §1).
+
+import type { PerformanceTier } from "./scrollPhysics";
 
 export type EngineConfig = {
   frameCount: number;
@@ -52,6 +58,7 @@ export class FrameEngine {
   private rafId = 0;
   private mobile = false;
   private dead = false;
+  private tier: PerformanceTier = "normal";
 
   constructor(
     private canvas: AnyCanvas,
@@ -63,6 +70,40 @@ export class FrameEngine {
     this.frames = new Array(cfg.frameCount).fill(null);
     this.inflight = new Array(cfg.frameCount).fill(false);
     this.ensureWindow(0);
+  }
+
+  // ── Tier → decode strategy (never gates the drawn frame) ───────────────────
+
+  setTier(t: PerformanceTier) {
+    if (t === this.tier) return;
+    this.tier = t;
+    this.applyQuality();
+  }
+
+  private applyQuality() {
+    this.ctx.imageSmoothingQuality =
+      !this.mobile && this.tier === "normal" ? "high" : "low";
+  }
+
+  private tierWindow() {
+    const W = this.cfg.window;
+    if (this.tier === "lowPower")      return Math.ceil(W * 0.8);
+    if (this.tier === "midPower")      return Math.ceil(W * 0.6);
+    if (this.tier === "ultraLowPower") return Math.ceil(W * 0.5);
+    return W;
+  }
+
+  // Coarse decode during extreme flings: skip every other frame so pick()
+  // lands on a neighbour ≤ 1 index away — invisible at fling speed.
+  private tierStride() {
+    return this.tier === "ultraLowPower" ? 2 : 1;
+  }
+
+  private tierEnsureStep() {
+    const s = this.cfg.ensureStep;
+    if (this.tier === "midPower")      return s * 2;
+    if (this.tier === "ultraLowPower") return s * 3;
+    return s;
   }
 
   private path(i: number) {
@@ -95,18 +136,33 @@ export class FrameEngine {
       }
     };
 
+    const fallbackLoad = (reason: any) => {
+      console.warn(`FrameEngine: createImageBitmap failed for frame ${i}, falling back to Image(). Reason:`, reason);
+      const img = new Image();
+      img.onload = () => settle(img);
+      img.onerror = (err) => {
+        console.error(`FrameEngine: Image fallback also failed for frame ${i}. Error:`, err);
+        this.inflight[i] = false;
+      };
+      img.src = this.path(i);
+    };
+
     if (typeof createImageBitmap !== "undefined") {
       fetch(this.path(i))
-        .then((r) => r.blob())
+        .then((r) => {
+          if (!r.ok) throw new Error(`HTTP error! status: ${r.status}`);
+          return r.blob();
+        })
         .then((b) => createImageBitmap(b))
         .then(settle)
-        .catch(() => {
-          this.inflight[i] = false;
+        .catch((err) => {
+          fallbackLoad(err);
         });
     } else {
       const img = new Image();
       img.onload = () => settle(img);
-      img.onerror = () => {
+      img.onerror = (err) => {
+        console.error(`FrameEngine: Image load failed for frame ${i}. Error:`, err);
         this.inflight[i] = false;
       };
       img.src = this.path(i);
@@ -116,12 +172,14 @@ export class FrameEngine {
   private ensureWindow(center: number) {
     this.center = center;
     const { window: W, releaseBuffer: B, frameCount: N } = this.cfg;
-    const lo = Math.max(0, center - W);
-    const hi = Math.min(N - 1, center + W);
-    for (let i = lo; i <= hi; i++) this.loadFrame(i);
-    // Release zone covers both the target center (look-ahead) AND the current
-    // playback position. During velocity cap these diverge; protecting both
-    // prevents the buffer from evicting frames that are actively being played.
+    const tw     = this.tierWindow();
+    const stride = this.tierStride();
+    const lo = Math.max(0, center - tw);
+    const hi = Math.min(N - 1, center + tw);
+    this.loadFrame(center); // exact position always decodes, whatever the stride
+    for (let i = lo; i <= hi; i += stride) this.loadFrame(i);
+    // Release zone always uses the FULL window + buffer (not the tier-shrunk
+    // one) so tier flips degrade prefetch without churn-evicting good frames.
     const cur = Math.round(this.current);
     const kLo = Math.min(Math.max(0, center - W - B), Math.max(0, cur - W - B));
     const kHi = Math.max(Math.min(N - 1, center + W + B), Math.min(N - 1, cur + W + B));
@@ -137,7 +195,7 @@ export class FrameEngine {
     this.mobile = mobile;
     this.canvas.width = width;
     this.canvas.height = height;
-    this.ctx.imageSmoothingQuality = mobile ? "low" : "high";
+    this.applyQuality();
     this.draw();
   }
 
@@ -153,11 +211,16 @@ export class FrameEngine {
     this.kick();
   }
 
+  // Backward-first substitution: when the exact frame isn't decoded yet,
+  // showing a slightly EARLIER frame reads as lag (acceptable); jumping to a
+  // future frame reads as a glitch (not). Forward is the last resort.
   private pick(index: number): Frame | null {
     const idx = Math.round(index);
     if (fReady(this.frames[idx])) return this.frames[idx];
     for (let d = 1; d <= this.cfg.window; d++) {
       if (fReady(this.frames[idx - d])) return this.frames[idx - d];
+    }
+    for (let d = 1; d <= this.cfg.window; d++) {
       if (fReady(this.frames[idx + d])) return this.frames[idx + d];
     }
     return null;
@@ -197,6 +260,20 @@ export class FrameEngine {
     }
     this.rafId = RAF(this.tick);
   };
+
+  // Physics-driven path: caller owns the timing loop (ScrollPhysics rAF).
+  // Sets current AND target so the internal tick() (triggered by frame loads)
+  // sees settled() immediately and never fights the physics position.
+  setFrame(fractionalIndex: number) {
+    this.current = fractionalIndex;
+    this.target  = fractionalIndex;
+    const c = Math.round(fractionalIndex);
+    if (Math.abs(c - this.lastEnsured) >= this.tierEnsureStep()) {
+      this.ensureWindow(c);
+      this.lastEnsured = c;
+    }
+    this.draw();
+  }
 
   getFrame(): number {
     return Math.round(this.current);

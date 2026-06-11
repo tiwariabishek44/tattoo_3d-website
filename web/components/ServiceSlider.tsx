@@ -13,7 +13,10 @@
 // Assets: 3 jungle/animal stills in ROTATION across 6 slides. No auto-advance.
 import { useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { SERIF, SANS, COLORS, GUTTER, BOOKING_HREF } from "@/lib/theme";
+import { SERIF, SANS, COLORS, GUTTER, BOOKING_HREF, withAlpha } from "@/lib/theme";
+import { SERVICE_VH, getDesktopSectionHeight } from "@/lib/scrollBudget";
+import { EASE_MECHANICAL } from "@/lib/motionTokens";
+import { useReducedMotionSafe } from "@/lib/useReducedMotionSafe";
 
 const IMG = "/crousal_images2";
 
@@ -27,30 +30,7 @@ const TEXT_DUR = BAR - TEXT_DELAY; // line-by-line fade fills the rest (to bar =
 const LINE_DUR = 0.5; // each line's own fade
 const TEXT_LINES = 5; // eyebrow, title, accent, paragraph, buttons
 const STAGGER = Math.max(0.06, (TEXT_DUR - LINE_DUR) / (TEXT_LINES - 1));
-const EASE = [0.4, 0, 0.2, 1] as const;
-
-// ── Escape-velocity gate constants ────────────────────────
-const GATE_VEL_LOW  = 1.5;   // px/ms — below: passive hold is enough
-const GATE_VEL_HIGH = 8.0;   // px/ms — above: deliberate fast scroll → governed glide (see below)
-const HOLD_MS_DOWN  = 1500;  // ms — downward entry hold (arriving from Buddha)
-const HOLD_MS_UP    = 1800;  // ms — upward entry hold (arriving from gallery)
-const VEL_DECAY_MS  = 200;   // ms — treat velocity as 0 if no recent wheel event
-const GOVERN_MAX_DELTA = 32; // px per wheel tick — extreme-velocity clamp: keeps the
-                             // page moving (never frozen) but slow enough that the
-                             // section is actually rendered/seen, not blown past in a blink
-// ─────────────────────────────────────────────────────────
-
-// Slogan fades in LINE BY LINE across the bar's last ~45%; old slogan fades out
-// first (no blink).
-const txtContainer = {
-  hidden: {},
-  show: { transition: { delayChildren: TEXT_DELAY, staggerChildren: STAGGER } },
-  exit: { opacity: 0, transition: { duration: 0.3 } },
-};
-const txtLine = {
-  hidden: { opacity: 0, y: 20 },
-  show: { opacity: 1, y: 0, transition: { duration: LINE_DUR, ease: "easeOut" } },
-};
+const EASE = EASE_MECHANICAL;
 
 type Slide = { img: string; accent: string; desc: string; place: string; sub: string };
 
@@ -87,142 +67,28 @@ export default function ServiceSlider() {
   const [started, setStarted] = useState(false); // gate the top progress bar
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const compact = useCompact();
+  const reduced = useReducedMotionSafe();
 
-  // ── Gate refs ─────────────────────────────────────────
-  const wrapperRef     = useRef<HTMLDivElement>(null);
-  const velRef         = useRef(0);
-  const lastWheelTsRef = useRef(0);
-  const directionRef   = useRef<"down" | "up">("down");
-
-  const downActiveRef   = useRef(false);
-  const downTimerRef    = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const downListenerRef = useRef<((e: WheelEvent) => void) | null>(null);
-
-  const upActiveRef     = useRef(false);
-  const upTimerRef      = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const upListenerRef   = useRef<((e: WheelEvent) => void) | null>(null);
-  // ─────────────────────────────────────────────────────
-
-  useEffect(() => {
-    const releaseDown = () => {
-      if (!downActiveRef.current) return;
-      downActiveRef.current = false;
-      if (downTimerRef.current) { clearTimeout(downTimerRef.current); downTimerRef.current = null; }
-      if (downListenerRef.current) {
-        document.removeEventListener("wheel", downListenerRef.current);
-        downListenerRef.current = null;
-      }
-    };
-
-    const releaseUp = () => {
-      if (!upActiveRef.current) return;
-      upActiveRef.current = false;
-      if (upTimerRef.current) { clearTimeout(upTimerRef.current); upTimerRef.current = null; }
-      if (upListenerRef.current) {
-        document.removeEventListener("wheel", upListenerRef.current);
-        upListenerRef.current = null;
-      }
-    };
-
-    const fireDownGate = () => {
-      if (downActiveRef.current) return;
-      downActiveRef.current = true;
-      let lastTs = performance.now();
-
-      const listener = (e: WheelEvent) => {
-        if (e.deltaY <= 0) { releaseDown(); return; }
-        const now = performance.now();
-        const dt = now - lastTs; lastTs = now;
-        const vel = dt > 0 && dt < VEL_DECAY_MS * 2 ? Math.abs(e.deltaY) / dt : 0;
-        e.preventDefault();
-        if (vel >= GATE_VEL_HIGH) {
-          // governed glide — a hard fling shouldn't blow the section past in
-          // a blink. Keep the page moving (don't freeze it), just clamp the
-          // per-tick distance so every frame of the section is actually seen.
-          window.scrollBy({ top: Math.min(e.deltaY, GOVERN_MAX_DELTA), left: 0 });
-        }
-        // else: pure hold — within the lock zone, freeze in place
-      };
-
-      downListenerRef.current = listener;
-      document.addEventListener("wheel", listener, { passive: false });
-      downTimerRef.current = setTimeout(releaseDown, HOLD_MS_DOWN);
-    };
-
-    const fireUpGate = () => {
-      if (upActiveRef.current) return;
-      upActiveRef.current = true;
-      let lastTs = performance.now();
-
-      const listener = (e: WheelEvent) => {
-        if (e.deltaY > 0) { releaseUp(); return; }
-        const now = performance.now();
-        const dt = now - lastTs; lastTs = now;
-        const vel = dt > 0 && dt < VEL_DECAY_MS * 2 ? Math.abs(e.deltaY) / dt : 0;
-        e.preventDefault();
-        if (vel >= GATE_VEL_HIGH) {
-          window.scrollBy({ top: Math.max(e.deltaY, -GOVERN_MAX_DELTA), left: 0 });
-        }
-      };
-
-      upListenerRef.current = listener;
-      document.addEventListener("wheel", listener, { passive: false });
-      upTimerRef.current = setTimeout(releaseUp, HOLD_MS_UP);
-    };
-
-    // Explicit boundary-crossing detection — fires on all FOUR transitions
-    // (enter-from-Buddha, exit-into-Gallery, enter-from-Gallery, exit-into-Buddha),
-    // driven directly by wheel events so fast scrolls can't skip a crossing
-    // (IntersectionObserver threshold callbacks can be batched/skipped at speed).
-    let prevTop: number | null = null;
-    let prevBottom: number | null = null;
-
-    const maybeGate = (dirNeeded: "down" | "up", fire: () => void) => {
-      const reduced = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches ?? false;
-      const isMobile = window.innerWidth < 820;
-      if (reduced || isMobile) return;
-      if (directionRef.current !== dirNeeded) return;
-      if (velRef.current < GATE_VEL_LOW) return; // gentle scroll — no gate needed
-      // NOTE: extreme velocity (>= GATE_VEL_HIGH) ALSO fires the gate now —
-      // the listener switches to governed-glide mode for it, instead of
-      // letting a hard fling blow the section past in a blink.
-      fire();
-    };
-
-    const trackVel = (e: WheelEvent) => {
-      const now = performance.now();
-      const dt  = now - lastWheelTsRef.current;
-      velRef.current = dt > 0 && dt < VEL_DECAY_MS * 2 ? Math.abs(e.deltaY) / dt : 0;
-      lastWheelTsRef.current = now;
-      directionRef.current = e.deltaY > 0 ? "down" : "up";
-
-      if (!wrapperRef.current) return;
-      const rect = wrapperRef.current.getBoundingClientRect();
-      const vh = window.innerHeight;
-
-      if (prevTop !== null && prevBottom !== null) {
-        if (prevTop >= vh && rect.top < vh)   maybeGate("down", fireDownGate); // entering from above (from Buddha)
-        if (prevTop < vh && rect.top >= vh)   maybeGate("up", fireUpGate);     // exiting upward (into Buddha)
-        if (prevBottom >= 0 && rect.bottom < 0) maybeGate("down", fireDownGate); // exiting downward (into Gallery)
-        if (prevBottom < 0 && rect.bottom >= 0) maybeGate("up", fireUpGate);   // entering from below (from Gallery)
-      }
-      prevTop = rect.top;
-      prevBottom = rect.bottom;
-    };
-    window.addEventListener("wheel", trackVel, { passive: true });
-
-    const onVisibilityChange = () => {
-      if (document.hidden) { releaseDown(); releaseUp(); }
-    };
-    document.addEventListener("visibilitychange", onVisibilityChange);
-
-    return () => {
-      window.removeEventListener("wheel", trackVel);
-      document.removeEventListener("visibilitychange", onVisibilityChange);
-      releaseDown();
-      releaseUp();
-    };
-  }, []);
+  // Slogan fades in LINE BY LINE across the bar's last ~45%; old slogan fades
+  // out first (no blink). Reduced motion: no stagger, no rise — lines appear
+  // together with a quick crossfade (Law 7 / H-27).
+  const txtContainer = {
+    hidden: {},
+    show: {
+      transition: reduced
+        ? { delayChildren: 0, staggerChildren: 0 }
+        : { delayChildren: TEXT_DELAY, staggerChildren: STAGGER },
+    },
+    exit: { opacity: 0, transition: { duration: reduced ? 0.15 : 0.3 } },
+  };
+  const txtLine = {
+    hidden: { opacity: 0, y: reduced ? 0 : 20 },
+    show: {
+      opacity: 1,
+      y: 0,
+      transition: { duration: reduced ? 0.15 : LINE_DUR, ease: "easeOut" },
+    },
+  };
 
   const change = (idx: number) => {
     if (idx === active) return;
@@ -242,8 +108,15 @@ export default function ServiceSlider() {
   const window_ = Array.from({ length: thumbCount }, (_, k) => (active + 1 + k) % N);
 
   return (
-    // 250vh wrapper — passive scroll hold budget + escape-velocity gate anchor
-    <div id="styles" data-cursor="scrub" ref={wrapperRef} style={{ height: "250vh", position: "relative" }}>
+    // SERVICE_VH wrapper — passive scroll hold budget (sticky + click-driven slider)
+    <div
+      id="styles"
+      data-cursor="scrub"
+      style={{
+        height: !compact ? `${getDesktopSectionHeight(SERVICE_VH)}px` : `${SERVICE_VH}vh`,
+        position: "relative"
+      }}
+    >
       <section
         aria-label="Design slider"
         data-transparent-header
@@ -264,7 +137,7 @@ export default function ServiceSlider() {
             left: 0,
             right: 0,
             height: "11%",
-            background: "linear-gradient(to bottom, rgba(16,14,11,1) 0%, rgba(16,14,11,0) 100%)",
+            background: `linear-gradient(to bottom, ${withAlpha(COLORS.charcoal, 1)} 0%, ${withAlpha(COLORS.charcoal, 0)} 100%)`,
             pointerEvents: "none",
             zIndex: 10,
           }}
@@ -281,7 +154,7 @@ export default function ServiceSlider() {
             left: 0,
             right: 0,
             height: 4,
-            background: "rgba(203,164,90,0.18)",
+            background: withAlpha(COLORS.gold, 0.18),
             zIndex: 7,
             pointerEvents: "none",
           }}
@@ -358,7 +231,7 @@ export default function ServiceSlider() {
             zIndex: 2,
             pointerEvents: "none",
             background:
-              "linear-gradient(to right, rgba(6,7,8,0.86) 0%, rgba(6,7,8,0.55) 38%, rgba(6,7,8,0.05) 72%), linear-gradient(to top, rgba(6,7,8,0.55), rgba(6,7,8,0) 40%)",
+              `linear-gradient(to right, ${withAlpha(COLORS.ink, 0.86)} 0%, ${withAlpha(COLORS.ink, 0.55)} 38%, ${withAlpha(COLORS.ink, 0.05)} 72%), linear-gradient(to top, ${withAlpha(COLORS.ink, 0.55)}, ${withAlpha(COLORS.ink, 0)} 40%)`,
           }}
         />
 
@@ -481,7 +354,7 @@ export default function ServiceSlider() {
           style={{
             position: "absolute",
             zIndex: 7,
-            right: compact ? 16 : "clamp(32px, 4vw, 64px)",
+            right: compact ? 16 : GUTTER,
             bottom: compact ? 20 : "clamp(28px, 5vh, 56px)",
             display: "flex",
             gap: compact ? 10 : 16,

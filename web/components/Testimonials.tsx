@@ -3,9 +3,13 @@
 import { useEffect, useRef, useState } from "react";
 import {
   motion, AnimatePresence, LayoutGroup,
-  useScroll, useTransform, useAnimation,
+  useScroll, useAnimation,
 } from "framer-motion";
 import { SERIF, SANS, COLORS, eyebrow, GUTTER } from "@/lib/theme";
+import { useParallax } from "@/lib/useParallax";
+import { PARALLAX_MID } from "@/lib/motionTokens";
+import { useScrollLock } from "@/lib/useScrollLock";
+import { useReducedMotionSafe } from "@/lib/useReducedMotionSafe";
 
 type Review = {
   id: string;
@@ -144,10 +148,8 @@ function DetailModal({ review, lampId, onClose }: {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [closing]);
 
-  useEffect(() => {
-    document.body.style.overflow = "hidden";
-    return () => { document.body.style.overflow = ""; };
-  }, []);
+  // D-16 — modal is only ever mounted while open, so the lock is unconditional.
+  useScrollLock(true);
 
   const firstName = review.name.split(" ")[0];
 
@@ -356,11 +358,12 @@ function DetailModal({ review, lampId, onClose }: {
 }
 
 // ── Card ──────────────────────────────────────────────────────────────────────
-function Card({ r, lampId, selectedLampId, onOpen }: {
+function Card({ r, lampId, selectedLampId, onOpen, compact }: {
   r: Review;
   lampId: string;
   selectedLampId: string | null;
   onOpen: (r: Review, lampId: string) => void;
+  compact: boolean;
 }) {
   const [hovered, setHovered] = useState(false);
   const ptrRef = useRef<{ x: number; y: number } | null>(null);
@@ -369,9 +372,9 @@ function Card({ r, lampId, selectedLampId, onOpen }: {
     <div
       style={{
         flexShrink: 0,
-        width: "clamp(280px, 30vw, 380px)",
+        width: compact ? "clamp(240px, 68vw, 300px)" : "clamp(280px, 30vw, 380px)",
         borderRadius: 20,
-        padding: "clamp(1.6rem, 2.2vw, 2.2rem)",
+        padding: compact ? "1.2rem 1.4rem" : "clamp(1.6rem, 2.2vw, 2.2rem)",
         background: "#ffffff",
         boxShadow: "0 16px 48px rgba(27,22,15,0.14)",
         position: "relative",
@@ -472,20 +475,23 @@ function Card({ r, lampId, selectedLampId, onOpen }: {
 }
 
 // ── Marquee row ───────────────────────────────────────────────────────────────
-function MarqueeRow({ items, rowKey, reverse, duration, selectedLampId, paused, onOpen }: {
+function MarqueeRow({ items, rowKey, reverse, duration, selectedLampId, paused, reduced, onOpen, compact }: {
   items: Review[];
   rowKey: string;
   reverse: boolean;
   duration: number;
   selectedLampId: string | null;
   paused: boolean;
+  reduced: boolean;
   onOpen: (r: Review, lampId: string) => void;
+  compact: boolean;
 }) {
   const loop = [...items, ...items];
   const controls = useAnimation();
 
+  // H-27 — reduced motion: never start the infinite marquee loop.
   useEffect(() => {
-    if (paused) {
+    if (paused || reduced) {
       controls.stop();
     } else {
       controls.start({
@@ -494,7 +500,7 @@ function MarqueeRow({ items, rowKey, reverse, duration, selectedLampId, paused, 
       });
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [paused]);
+  }, [paused, reduced]);
 
   return (
     <div
@@ -517,6 +523,7 @@ function MarqueeRow({ items, rowKey, reverse, duration, selectedLampId, paused, 
             lampId={`${r.id}-${rowKey}-${i}`}
             selectedLampId={selectedLampId}
             onOpen={onOpen}
+            compact={compact}
           />
         ))}
       </motion.div>
@@ -527,14 +534,20 @@ function MarqueeRow({ items, rowKey, reverse, duration, selectedLampId, paused, 
 // ── Section ───────────────────────────────────────────────────────────────────
 export default function Testimonials() {
   const [selected, setSelected] = useState<{ review: Review; lampId: string } | null>(null);
+  const compact = useCompact();
   const sectionRef = useRef<HTMLElement>(null);
   const { scrollYProgress } = useScroll({
     target: sectionRef,
     offset: ["start end", "end start"],
   });
 
-  const labelY = useTransform(scrollYProgress, [0, 1], [-195, 195]);
-  const sheetY = useTransform(scrollYProgress, [0, 1], [195, -195]);
+  const reduced = useReducedMotionSafe();
+
+  // E-19 — counter-moving label/sheet pair on the midground plane (1.0x),
+  // opposite directions via the sign of the rate. Ranges chosen so
+  // range * rate reproduces the original ∓195 travel.
+  const labelY = useParallax(scrollYProgress, -PARALLAX_MID, reduced ? 0 : 195);
+  const sheetY = useParallax(scrollYProgress, PARALLAX_MID, reduced ? 0 : 195);
 
   const paused = selected !== null;
   const selectedLampId = selected?.lampId ?? null;
@@ -556,14 +569,13 @@ export default function Testimonials() {
 
         <section
           ref={sectionRef}
-          style={{ background: "#fafafa", padding: `clamp(80px, 12vh, 140px) 6px` }}
+          style={{ background: "#fafafa", padding: `clamp(80px, 12vh, 140px) ${GUTTER}` }}
         >
           <motion.div
             style={{
               y: labelY,
               maxWidth: "min(1600px, 100vw)",
               margin: `clamp(48px, 8vh, 96px) auto clamp(56px, 9vh, 110px)`,
-              padding: `clamp(40px, 7vh, 80px) ${GUTTER}`,
               textAlign: "center",
             }}
           >
@@ -577,7 +589,7 @@ export default function Testimonials() {
           <motion.div
             style={{
               y: sheetY,
-              maxWidth: "min(1600px, 100vw)",
+              width: "100%",
               margin: "clamp(40px, 6vh, 64px) auto 0",
               background: "rgba(7,6,5,0.66)",
               backdropFilter: "blur(22px) saturate(140%)",
@@ -595,9 +607,9 @@ export default function Testimonials() {
               </p>
             </div>
             <div style={{ marginTop: "clamp(40px, 6vh, 64px)", display: "flex", flexDirection: "column", gap: 24 }}>
-              <MarqueeRow items={ROW_A} rowKey="a" reverse={false} duration={48} selectedLampId={selectedLampId} paused={paused} onOpen={handleOpen} />
-              <MarqueeRow items={ROW_B} rowKey="b" reverse={true}  duration={56} selectedLampId={selectedLampId} paused={paused} onOpen={handleOpen} />
-              <MarqueeRow items={ROW_C} rowKey="c" reverse={false} duration={64} selectedLampId={selectedLampId} paused={paused} onOpen={handleOpen} />
+              <MarqueeRow items={ROW_A} rowKey="a" reverse={false} duration={48} selectedLampId={selectedLampId} paused={paused} reduced={reduced} onOpen={handleOpen} compact={compact} />
+              <MarqueeRow items={ROW_B} rowKey="b" reverse={true}  duration={56} selectedLampId={selectedLampId} paused={paused} reduced={reduced} onOpen={handleOpen} compact={compact} />
+              <MarqueeRow items={ROW_C} rowKey="c" reverse={false} duration={64} selectedLampId={selectedLampId} paused={paused} reduced={reduced} onOpen={handleOpen} compact={compact} />
             </div>
           </motion.div>
         </section>

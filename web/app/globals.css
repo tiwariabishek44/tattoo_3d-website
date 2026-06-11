@@ -4,17 +4,32 @@
   box-sizing: border-box;
 }
 
+/* D-16 — reserve the scrollbar gutter so locking body scroll for lightboxes/
+   modals (useScrollLock) never shifts layout by the scrollbar's width. */
 html {
-  /* Smooth-scroll for in-page nav anchors. Only affects programmatic / hash /
-     keyboard scrolling — wheel scrubbing (the scroll-scrub sections + their
-     escape-velocity gates) is untouched, since those listen to raw wheel events. */
-  scroll-behavior: smooth;
+  scrollbar-gutter: stable;
 }
 
-@media (prefers-reduced-motion: reduce) {
-  html {
-    scroll-behavior: auto;
-  }
+/* Lenis smooth scroll styling boilerplate */
+html.lenis,
+html.lenis body {
+  height: auto;
+}
+
+.lenis.lenis-smooth {
+  scroll-behavior: auto !important;
+}
+
+.lenis.lenis-smooth [data-lenis-prevent] {
+  overscroll-behavior: contain;
+}
+
+.lenis.lenis-stopped {
+  overflow: hidden;
+}
+
+.lenis.lenis-scrolling iframe {
+  pointer-events: none;
 }
 
 html,
@@ -40,7 +55,9 @@ canvas {
   position: fixed;
   top: 0;
   left: 0;
-  z-index: 10000;
+  /* Above any dev overlay (TelemetryOverlay, hero-loop tuning panel = 99999) —
+     the user's pointer must never render behind diagnostic UI. */
+  z-index: 999999;
   pointer-events: none;
   opacity: 0;
   will-change: transform, opacity;
@@ -81,6 +98,24 @@ canvas {
 .cursor-ring[data-pressed="1"] {
   width: 26px;
   height: 26px;
+}
+
+/* over light backgrounds → change cursor colors to dark ink */
+.cursor-ring.light-bg {
+  border-color: rgba(7, 6, 5, 0.72);
+}
+.cursor-dot.light-bg {
+  background: #070605;
+}
+.cursor-ring.light-bg[data-state="link"] {
+  border-color: #cba45a;
+  background: rgba(203, 164, 90, 0.16);
+}
+.cursor-dot.light-bg[data-state="link"] {
+  background: #cba45a;
+}
+.cursor-ring.light-bg[data-state="scrub"] {
+  border-color: rgba(203, 164, 90, 0.85);
 }
 
 .nav-link {

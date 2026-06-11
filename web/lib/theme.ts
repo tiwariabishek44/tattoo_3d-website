@@ -13,6 +13,18 @@ export const COLORS = {
   mutedDark: "rgba(27,22,15,0.7)",
 };
 
+// Convert a "#rrggbb" COLORS token to "rgba(r, g, b, alpha)" — lets
+// components apply a brand color at any opacity without re-hardcoding the
+// rgb triplet inline (I-29). One source of truth: change COLORS, every
+// withAlpha() call follows.
+export function withAlpha(hex: string, alpha: number): string {
+  const h = hex.replace("#", "");
+  const r = parseInt(h.substring(0, 2), 16);
+  const g = parseInt(h.substring(2, 4), 16);
+  const b = parseInt(h.substring(4, 6), 16);
+  return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+}
+
 export const eyebrow = (color: string = COLORS.gold): React.CSSProperties => ({
   fontFamily: SANS,
   textTransform: "uppercase",

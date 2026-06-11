@@ -54,6 +54,23 @@ export default function CustomCursor() {
       ring.style.opacity = "1";
       dot.style.opacity = "1";
       const t = e.target as Element | null;
+
+      const isOverLight = t?.closest("#gallery") ||
+                          t?.closest("#testimonials") ||
+                          t?.closest(".story-gallery-scroll") ||
+                          t?.closest('[style*="background: rgb(241, 234, 221)"]') ||
+                          t?.closest('[style*="background: #F1EADD"]') ||
+                          t?.closest('[style*="background: rgb(255, 255, 255)"]') ||
+                          t?.closest('[style*="background: #ffffff"]');
+
+      if (isOverLight) {
+        ring.classList.add("light-bg");
+        dot.classList.add("light-bg");
+      } else {
+        ring.classList.remove("light-bg");
+        dot.classList.remove("light-bg");
+      }
+
       if (t?.closest(INTERACTIVE)) setState("link");
       else if (t?.closest('[data-cursor="scrub"]')) setState("scrub");
       else setState("default");
