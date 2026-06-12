@@ -6,9 +6,9 @@ import Reveal from "@/components/Reveal";
 import { SERIF, SANS, COLORS, eyebrow, GUTTER } from "@/lib/theme";
 
 export const metadata: Metadata = {
-  title: "After Care — Abishek Tattoo Ink",
+  title: "After Care — InkSpire Tattoo",
   description:
-    "How to care for a fresh tattoo so it heals clean and stays sharp — the Abishek aftercare guide.",
+    "How to care for a fresh tattoo so it heals clean and stays sharp — the InkSpire aftercare guide.",
 };
 
 // Real aftercare guidance — standard, honest, studio-voiced. Swap to the studio's
@@ -247,7 +247,7 @@ export default function AfterCarePage() {
             }}
           >
             <a
-              href="mailto:hello@Abishek.ink"
+              href="mailto:hello@inkspire.tattoo"
               style={{
                 fontFamily: SANS,
                 textTransform: "uppercase",

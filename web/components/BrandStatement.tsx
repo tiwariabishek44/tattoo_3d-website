@@ -112,7 +112,7 @@ export default function BrandStatement() {
               }}
             >
               <span style={{ width: 34, height: 1, background: COLORS.gold }} />
-              <span style={eyebrow()}>Abishek&apos;s Tattoo Ink</span>
+              <span style={eyebrow()}>InkSpire Tattoo</span>
             </motion.div>
 
             <motion.div style={{ opacity: hlOpacity, y: hlY }}>
@@ -144,7 +144,7 @@ export default function BrandStatement() {
                   textShadow: "0 1px 16px rgba(0,0,0,0.5)",
                 }}
               >
-                Abishek Tattoo Ink is built on a simple belief — that a tattoo is
+                InkSpire Tattoo is built on a simple belief — that a tattoo is
                 a decision worth honouring. Step inside and you&apos;ll feel it:
                 Kathmandu&apos;s living heritage sitting easily beside raw,
                 contemporary expression — exactly how we work, and exactly how

@@ -7,7 +7,7 @@ import { BOOKING_HREF } from "@/lib/theme";
 const SANS = "var(--font-inter), system-ui, sans-serif";
 const SERIF = "var(--font-cormorant), Georgia, serif";
 const SIDE = "clamp(24px, 4.7vw, 90px)";
-const IG_URL = "https://instagram.com/Abishek.ink";
+const IG_URL = "https://instagram.com/inkspire.tattoo";
 
 const INK     = "#0B0907";
 const GOLD    = "#CBA45A";
@@ -26,7 +26,7 @@ const COL1: { label: string; href: string }[] = [
 ];
 const COL2: { label: string; href: string }[] = [
   { label: "Instagram",        href: IG_URL },
-  { label: "hello@Abishek.ink", href: "mailto:hello@Abishek.ink" },
+  { label: "hello@inkspire.tattoo", href: "mailto:hello@inkspire.tattoo" },
   { label: "Book a session",   href: BOOKING_HREF },
   { label: "Find the studio",  href: "/#contact" },
 ];
@@ -106,7 +106,7 @@ export default function Footer() {
         <svg
           viewBox="0 0 1000 330"
           role="img"
-          aria-label="Abishek Tattoo Ink"
+          aria-label="InkSpire Tattoo"
           // Responsive sizing via CSS (height:auto is valid in CSS — the old
           // height="auto" *attribute* was the console error). viewBox holds ratio.
           style={{ display: "block", width: "100%", height: "auto", filter: GLOW }}
@@ -121,7 +121,7 @@ export default function Footer() {
             fontSize="150"
             fill={GOLD}
           >
-            Abishek Tattoo
+            InkSpire
           </text>
           <text
             x="500"
@@ -132,7 +132,7 @@ export default function Footer() {
             fontSize="150"
             fill={GOLD}
           >
-            Ink
+            Tattoo
           </text>
         </svg>
       </div>
@@ -154,7 +154,7 @@ export default function Footer() {
           color: MUTED,
         }}
       >
-        <span>© 2026 Abishek Tattoo Ink · Thamel, Kathmandu</span>
+        <span>© 2026 InkSpire Tattoo · Thamel, Kathmandu</span>
         <div style={{ display: "flex", gap: "clamp(18px, 2.2vw, 32px)", flexWrap: "wrap" }}>
           {BOTTOM.map((l) => (
             <a
@@ -162,7 +162,7 @@ export default function Footer() {
               href={
                 l === "After Care" ? "/after-care"
                 : l === "Instagram" ? IG_URL
-                : "mailto:hello@Abishek.ink"
+                : "mailto:hello@inkspire.tattoo"
               }
               style={{
                 color: MUTED,

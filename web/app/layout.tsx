@@ -19,7 +19,7 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "Abishek Tattoo Ink",
+  title: "InkSpire Tattoo",
   description: "Permanence is a craft.",
 };
 

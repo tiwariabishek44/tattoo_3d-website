@@ -8,17 +8,65 @@
 //
 // SSOT: web/HOMEPAGE_FRAGRANCE_PLAN.md (A2 / A2b).
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 
 const INK = "#070605";
-const MIN_HOLD_MS = 900;   // floor so the logo is actually seen before we dissolve
+const MIN_HOLD_MS = 1200;  // slightly longer floor so logo & loading sequence are clearly visible
 const DISSOLVE_MS = 650;   // curtain fade-out duration (keep in sync with style)
-const MAX_WAIT_MS = 2600;  // fallback: dissolve even if `hero:ready` never fires
+const MAX_WAIT_MS = 25000; // fallback: dissolve even if downloads take too long
+
+const ESTIMATED_SIZES: Record<string, number> = {
+  "/hero_scrub.webm": 9827590,
+  "/hero_scrub.mp4": 7102502,
+  "/buddha_scrub.webm": 5232120,
+  "/buddha_scrub.mp4": 3451210,
+};
+
+function canPlayWebm(): boolean {
+  if (typeof window === "undefined") return true;
+  try {
+    const video = document.createElement("video");
+    return video.canPlayType('video/webm; codecs="vp9"') !== "";
+  } catch (e) {
+    return false;
+  }
+}
 
 export default function EntryCurtain() {
   const [mounted, setMounted] = useState(true);
   const [logoIn, setLogoIn] = useState(false);
   const [dissolving, setDissolving] = useState(false);
+  const [progress, setProgress] = useState(0);
+  const [showSkip, setShowSkip] = useState(false);
+
+  const abortControllerRef = useRef<AbortController | null>(null);
+
+  const getStatusText = (pct: number) => {
+    if (pct < 30) return "PREPARING CANVAS...";
+    if (pct < 70) return "CALIBRATING MACHINE...";
+    if (pct < 95) return "SHAPING THE SOUL...";
+    return "ELEVATING MIND...";
+  };
+
+  const startDissolve = (finishTimerRef?: { current: ReturnType<typeof setTimeout> | null }) => {
+    setDissolving(true);
+    const timer = setTimeout(() => {
+      document.body.style.overflow = "";
+      setMounted(false);
+    }, DISSOLVE_MS);
+    if (finishTimerRef) {
+      finishTimerRef.current = timer;
+    }
+  };
+
+  const handleSkipClick = () => {
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+    }
+    setDissolving(true);
+    document.body.style.overflow = "";
+    setMounted(false);
+  };
 
   useEffect(() => {
     const reduced =
@@ -34,35 +82,126 @@ export default function EntryCurtain() {
     // logo fades/scales in just after mount
     const logoTimer = setTimeout(() => setLogoIn(true), 60);
 
+    // skip button fades in after 4 seconds
+    const skipTimer = setTimeout(() => setShowSkip(true), 4000);
+
     let dissolved = false;
-    let finishTimer: ReturnType<typeof setTimeout> | null = null;
-    const startDissolve = () => {
+    const finishTimerRef = { current: null as ReturnType<typeof setTimeout> | null };
+
+    const startDissolveSequence = () => {
       if (dissolved) return;
       dissolved = true;
-      setDissolving(true);
-      finishTimer = setTimeout(() => {
-        document.body.style.overflow = "";
-        setMounted(false);
-      }, DISSOLVE_MS);
+      const elapsed = performance.now() - mountTs;
+      const wait = Math.max(0, MIN_HOLD_MS - elapsed);
+      setTimeout(() => startDissolve(finishTimerRef), wait);
     };
 
-    // dissolve once the hero is ready — but never before MIN_HOLD_MS (logo seen)
-    const onReady = () => {
-      const wait = Math.max(0, MIN_HOLD_MS - (performance.now() - mountTs));
-      setTimeout(startDissolve, wait);
+    // Preloading logic
+    const controller = new AbortController();
+    abortControllerRef.current = controller;
+    const { signal } = controller;
+
+    const supportsWebm = canPlayWebm();
+    const heroSrc = supportsWebm ? "/hero_scrub.webm" : "/hero_scrub.mp4";
+    const buddhaSrc = supportsWebm ? "/buddha_scrub.webm" : "/buddha_scrub.mp4";
+
+    const heroEst = ESTIMATED_SIZES[heroSrc] || 8000000;
+    const buddhaEst = ESTIMATED_SIZES[buddhaSrc] || 4000000;
+
+    let heroBytesRead = 0;
+    let buddhaBytesRead = 0;
+    let heroTotal = heroEst;
+    let buddhaTotal = buddhaEst;
+
+    const updateCombinedProgress = () => {
+      const loaded = heroBytesRead + buddhaBytesRead;
+      const total = heroTotal + buddhaTotal;
+      const pct = total > 0 ? Math.min(99, Math.round((loaded / total) * 100)) : 0;
+      setProgress(pct);
     };
 
-    const w = window as typeof window & { __heroReady?: boolean };
-    if (w.__heroReady) onReady();
-    else window.addEventListener("hero:ready", onReady, { once: true });
+    const fetchAsset = async (url: string, estimatedSize: number, isHero: boolean) => {
+      try {
+        const response = await fetch(url, { signal });
+        if (!response.ok) throw new Error(`Status ${response.status}`);
 
-    const fallback = setTimeout(startDissolve, MAX_WAIT_MS);
+        const contentLengthHeader = response.headers.get("Content-Length");
+        const totalBytes = contentLengthHeader ? parseInt(contentLengthHeader, 10) : estimatedSize;
+
+        if (isHero) heroTotal = totalBytes;
+        else buddhaTotal = totalBytes;
+
+        const reader = response.body?.getReader();
+        if (!reader) {
+          const blob = await response.blob();
+          const objUrl = URL.createObjectURL(blob);
+          if (isHero) {
+            (window as any).__heroVideoUrl = objUrl;
+            heroBytesRead = totalBytes;
+          } else {
+            (window as any).__buddhaVideoUrl = objUrl;
+            buddhaBytesRead = totalBytes;
+          }
+          updateCombinedProgress();
+          return;
+        }
+
+        const chunks: Uint8Array[] = [];
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          if (value) {
+            chunks.push(value);
+            if (isHero) {
+              heroBytesRead += value.length;
+            } else {
+              buddhaBytesRead += value.length;
+            }
+            updateCombinedProgress();
+          }
+        }
+
+        const finalBlob = new Blob(chunks as BlobPart[], { type: response.headers.get("Content-Type") || undefined });
+        const objUrl = URL.createObjectURL(finalBlob);
+        if (isHero) {
+          (window as any).__heroVideoUrl = objUrl;
+        } else {
+          (window as any).__buddhaVideoUrl = objUrl;
+        }
+      } catch (err) {
+        if ((err as Error).name !== "AbortError") {
+          console.warn(`Fallback preloading: ${url}`, err);
+          if (isHero) heroBytesRead = heroTotal;
+          else buddhaBytesRead = buddhaTotal;
+          updateCombinedProgress();
+        }
+      }
+    };
+
+    // Load both video assets in parallel
+    Promise.all([
+      fetchAsset(heroSrc, heroEst, true),
+      fetchAsset(buddhaSrc, buddhaEst, false),
+    ]).then(() => {
+      setProgress(100);
+      startDissolveSequence();
+    }).catch((err) => {
+      console.warn("Asset preloading failed, dissolving curtain.", err);
+      setProgress(100);
+      startDissolveSequence();
+    });
+
+    const fallback = setTimeout(() => {
+      setProgress(100);
+      startDissolveSequence();
+    }, MAX_WAIT_MS);
 
     return () => {
       clearTimeout(logoTimer);
+      clearTimeout(skipTimer);
       clearTimeout(fallback);
-      if (finishTimer) clearTimeout(finishTimer);
-      window.removeEventListener("hero:ready", onReady);
+      if (finishTimerRef.current) clearTimeout(finishTimerRef.current);
+      controller.abort();
       document.body.style.overflow = "";
     };
   }, []);
@@ -78,28 +217,123 @@ export default function EntryCurtain() {
         zIndex: 9999,
         background: INK,
         display: "flex",
+        flexDirection: "column",
         alignItems: "center",
         justifyContent: "center",
         opacity: dissolving ? 0 : 1,
         transition: `opacity ${DISSOLVE_MS}ms ease`,
         pointerEvents: dissolving ? "none" : "auto",
+        gap: "24px",
       }}
     >
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img
-        src="/logo.webp"
-        alt=""
-        style={{
-          width: "clamp(120px, 16vw, 200px)",
-          height: "auto",
-          borderRadius: "50%",
-          opacity: logoIn ? 1 : 0,
-          // settle in (0.96 → 1), then open slightly on dissolve (→ 1.06). No bounce.
-          transform: `scale(${dissolving ? 1.06 : logoIn ? 1 : 0.96})`,
-          transition: "opacity 0.5s ease, transform 0.7s ease",
-          filter: "drop-shadow(0 8px 40px rgba(0,0,0,0.6))",
-        }}
-      />
+      <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "20px" }}>
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src="/logo.webp"
+          alt=""
+          style={{
+            width: "clamp(120px, 16vw, 200px)",
+            height: "auto",
+            borderRadius: "50%",
+            opacity: logoIn ? 1 : 0,
+            transform: `scale(${dissolving ? 1.06 : logoIn ? 1 : 0.96})`,
+            transition: "opacity 0.5s ease, transform 0.7s ease",
+            filter: "drop-shadow(0 8px 40px rgba(0,0,0,0.6))",
+          }}
+        />
+
+        {/* Preloader UI */}
+        <div
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            gap: "10px",
+            opacity: logoIn ? 1 : 0,
+            transition: "opacity 0.5s ease 0.2s",
+            width: "100%",
+          }}
+        >
+          {/* Percentage */}
+          <span
+            style={{
+              fontFamily: "var(--font-inter), system-ui, sans-serif",
+              fontSize: "1.1rem",
+              fontWeight: 300,
+              color: "#f2efe9",
+              letterSpacing: "0.05em",
+            }}
+          >
+            {progress}%
+          </span>
+
+          {/* Progress Bar Track */}
+          <div
+            style={{
+              width: "clamp(180px, 20vw, 300px)",
+              height: "2px",
+              background: "rgba(242, 239, 233, 0.1)",
+              borderRadius: "1px",
+              overflow: "hidden",
+              position: "relative",
+            }}
+          >
+            {/* Progress Bar Fill */}
+            <div
+              style={{
+                position: "absolute",
+                left: 0,
+                top: 0,
+                bottom: 0,
+                width: `${progress}%`,
+                background: "#cba45a",
+                boxShadow: "0 0 8px rgba(203, 164, 90, 0.8)",
+                transition: "width 0.1s ease-out",
+              }}
+            />
+          </div>
+
+          {/* Dynamic Status Message */}
+          <span
+            style={{
+              fontFamily: "var(--font-inter), system-ui, sans-serif",
+              fontSize: "0.65rem",
+              letterSpacing: "0.2em",
+              color: "rgba(242, 239, 233, 0.5)",
+              marginTop: "4px",
+              textTransform: "uppercase",
+            }}
+          >
+            {getStatusText(progress)}
+          </span>
+        </div>
+      </div>
+
+      {/* Skip Intro */}
+      {showSkip && (
+        <button
+          onClick={handleSkipClick}
+          style={{
+            position: "absolute",
+            bottom: "40px",
+            background: "none",
+            border: "none",
+            color: "rgba(242, 239, 233, 0.4)",
+            fontFamily: "var(--font-inter), system-ui, sans-serif",
+            fontSize: "0.75rem",
+            letterSpacing: "0.15em",
+            textTransform: "uppercase",
+            cursor: "pointer",
+            padding: "8px 16px",
+            transition: "color 0.25s ease, opacity 0.5s ease",
+            outline: "none",
+          }}
+          onMouseEnter={(e) => (e.currentTarget.style.color = "#cba45a")}
+          onMouseLeave={(e) => (e.currentTarget.style.color = "rgba(242, 239, 233, 0.4)")}
+        >
+          Skip Intro
+        </button>
+      )}
     </div>
   );
 }

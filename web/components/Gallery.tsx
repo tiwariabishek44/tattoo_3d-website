@@ -115,7 +115,7 @@ export default function Gallery({ theme = "dark" }: { theme?: "dark" | "light" }
             maxWidth: "52ch",
           }}
         >
-          Real pieces, real skin — straight from the Abishek chair.
+          Real pieces, real skin — straight from the InkSpire chair.
         </p>
 
         {/* filter row */}

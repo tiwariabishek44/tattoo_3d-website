@@ -162,3 +162,13 @@ canvas {
 .footer-link:hover {
   color: #cba45a !important;
 }
+
+/* Scrollable areas that should scroll without showing a scrollbar
+   (e.g. the testimonial detail modal's artwork panel). */
+.no-scrollbar {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}

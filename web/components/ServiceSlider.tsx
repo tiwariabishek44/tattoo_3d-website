@@ -316,8 +316,7 @@ export default function ServiceSlider() {
                   {s.desc}
                 </motion.p>
                 <motion.div variants={txtLine} style={{ display: "flex", gap: 16, flexWrap: "wrap" }}>
-                  {/* B4 — real intent, wired. Primary books this style; secondary
-                      sends you to the work. (Was placeholder SEE MORE / SUBSCRIBE.) */}
+                  {/* B4 — real intent, wired: books this style. */}
                   <motion.a
                     href={BOOKING_HREF}
                     whileHover={{ scale: 1.04 }}
@@ -326,15 +325,6 @@ export default function ServiceSlider() {
                     style={btnSolid}
                   >
                     BOOK THIS STYLE
-                  </motion.a>
-                  <motion.a
-                    href="/#gallery"
-                    whileHover={{ scale: 1.04, borderColor: "rgba(255,255,255,0.9)" }}
-                    whileTap={{ scale: 0.98 }}
-                    transition={{ duration: 0.22, ease: EASE }}
-                    style={btnOutline}
-                  >
-                    VIEW GALLERY
                   </motion.a>
                 </motion.div>
               </motion.div>
@@ -449,21 +439,6 @@ const btnSolid: React.CSSProperties = {
   cursor: "pointer",
 };
 
-const btnOutline: React.CSSProperties = {
-  display: "inline-block",
-  textDecoration: "none",
-  fontFamily: "var(--font-inter), sans-serif",
-  fontWeight: 700,
-  letterSpacing: "0.12em",
-  fontSize: "0.82rem",
-  color: "#fff",
-  background: "transparent",
-  border: "1.5px solid rgba(255,255,255,0.55)",
-  padding: "16px 30px",
-  borderRadius: 4,
-  cursor: "pointer",
-};
-
 const arrow: React.CSSProperties = {
   width: 52,
   height: 52,
@@ -491,8 +466,8 @@ function ArrowBtn({ dir, onClick }: { dir: -1 | 1; onClick: () => void }) {
       whileTap={{ scale: 0.94 }}
       variants={{
         rest: {
-          borderColor: "rgba(255,255,255,0.45)",
-          backgroundColor: "rgba(255,255,255,0.04)",
+          borderColor: "rgba(255,255,255,0.65)",
+          backgroundColor: "rgba(255,255,255,0.08)",
         },
         hover: {
           borderColor: "rgba(255,255,255,0.9)",

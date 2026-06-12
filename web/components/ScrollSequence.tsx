@@ -4,8 +4,8 @@
 // (HeroVideo) instead of a main-thread 240-frame canvas — see Phase 1 of
 // scroll-smoothness-postmortem.md. The hero is a 200vh scroll-through with the
 // video pinned (sticky); HeroText's local progress (0-1 over that range) drives
-// the two-slogan handoff, and the video gets a subtle parallax zoom. A single
-// useScroll instance feeds both consumers (one clock for the hero).
+// the two-slogan handoff. A single useScroll instance feeds both consumers
+// (one clock for the hero).
 
 import { useEffect, useRef, useState } from "react";
 import { useScroll } from "framer-motion";
@@ -28,7 +28,7 @@ export default function ScrollSequence() {
   }, []);
 
   // 0 -> 1 over the full pinned phase (one viewport-height of scroll). Drives
-  // both HeroText's exit and the HeroVideo parallax zoom — one MotionValue.
+  // HeroText's exit and HeroVideo's scrub — one MotionValue.
   const { scrollYProgress } = useScroll({
     target: containerRef,
     offset: ["start start", "end end"],

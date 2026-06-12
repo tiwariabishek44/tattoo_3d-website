@@ -58,7 +58,7 @@ const ARTISTS: Artist[] = [
     name: "Tenzin",
     craft: "Fine line & custom",
     quote: "Fine lines, told slowly — like a sentence worth finishing properly.",
-    bio: "Trained across Kathmandu and Bangkok before settling into the Abishek chair, Tenzin works at a deliberately unhurried pace — a single-needle hand built for clients who want one piece told exactly right, not three told quickly.",
+    bio: "Trained across Kathmandu and Bangkok before settling into the InkSpire chair, Tenzin works at a deliberately unhurried pace — a single-needle hand built for clients who want one piece told exactly right, not three told quickly.",
     stats: [
       { value: "Single-Needle Custom", label: "Specialty" },
       { value: "Kathmandu & Bangkok", label: "Training" },
@@ -84,7 +84,7 @@ const ARTISTS: Artist[] = [
     name: "Rohan",
     craft: "Blackwork & traditional",
     quote: "Bold and permanent — I want it to still mean something in twenty years.",
-    bio: "Two generations of traditional artists shaped Rohan's hand before Abishek did — saturated black, confident outlines, and a respect for how a piece ages on skin, not just how it photographs on the day it's finished.",
+    bio: "Two generations of traditional artists shaped Rohan's hand before InkSpire did — saturated black, confident outlines, and a respect for how a piece ages on skin, not just how it photographs on the day it's finished.",
     stats: [
       { value: "High-Saturated Blackwork", label: "Specialty" },
       { value: "Second-Gen Traditional", label: "Lineage" },
@@ -1025,7 +1025,7 @@ export default function ArtistShowcaseSlider() {
                       maxWidth: "54ch",
                     }}
                   >
-                    Real pieces, real skin — straight from the Abishek chair.
+                    Real pieces, real skin — straight from the InkSpire chair.
                   </p>
                   {/* same masonry DNA as the gallery section: CSS columns,
                       break-inside avoid, natural image heights — column

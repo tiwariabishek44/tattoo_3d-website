@@ -4,7 +4,7 @@ import { SERIF, SANS, COLORS, eyebrow } from "@/lib/theme";
 const INFO = [
   { label: "Studio", lines: ["Thamel, Kathmandu", "Nepal 44600"] },
   { label: "Hours", lines: ["Mon – Sat · 11am – 8pm", "Sunday · by appointment"] },
-  { label: "Contact", lines: ["+977 98XX XXXXXX", "hello@Abishek.ink"] },
+  { label: "Contact", lines: ["+977 98XX XXXXXX", "hello@inkspire.tattoo"] },
 ];
 
 export default function Visit() {

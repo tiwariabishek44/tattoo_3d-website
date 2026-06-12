@@ -113,7 +113,7 @@ export default function Header() {
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src="/logo.webp"
-          alt="Abishek Tattoo Ink"
+          alt="InkSpire Tattoo"
           style={{
             height: scrolled
               ? "clamp(64px, 6vw, 92px)"

@@ -55,7 +55,7 @@ export default function BookingCTA() {
       <div style={{ position: "relative", zIndex: 2 }}>
         <Reveal variant="rule">
           <div style={{ ...eyebrow(), marginBottom: "1.6rem" }}>
-            Abishek Tattoo Ink
+            InkSpire Tattoo
           </div>
         </Reveal>
         <Reveal delay={0.08} variant="heading">

@@ -201,7 +201,7 @@ export default function GalleryPinterest({
           maxWidth: "54ch",
         }}
       >
-        Real pieces, real skin — straight from the Abishek chair.
+        Real pieces, real skin — straight from the InkSpire chair.
       </p>
 
       {/* filter row — neutral chips */}
@@ -285,8 +285,8 @@ export default function GalleryPinterest({
                   transition: "transform 0.5s ease",
                 }}
               />
-              {/* hover overlay — Pinterest-pin style (per reference): red Save,
-                  light Visit-site pill, dark round expand. */}
+              {/* hover overlay — Pinterest-pin style (per reference): dark
+                  round expand only (Save + category pill removed). */}
               <div
                 style={{
                   position: "absolute",
@@ -297,43 +297,6 @@ export default function GalleryPinterest({
                   pointerEvents: "none",
                 }}
               >
-                {/* Save — Pinterest red */}
-                <span
-                  style={{
-                    position: "absolute",
-                    top: 12,
-                    right: 12,
-                    background: "#E60023",
-                    color: "#fff",
-                    fontFamily: SANS,
-                    fontWeight: 700,
-                    fontSize: "0.92rem",
-                    padding: "0.6rem 1.15rem",
-                    borderRadius: 999,
-                  }}
-                >
-                  Save
-                </span>
-                {/* Visit-site style pill — light */}
-                <span
-                  style={{
-                    position: "absolute",
-                    left: 12,
-                    bottom: 12,
-                    display: "flex",
-                    alignItems: "center",
-                    gap: 6,
-                    background: "rgba(255,255,255,0.95)",
-                    color: "#111",
-                    fontFamily: SANS,
-                    fontWeight: 600,
-                    fontSize: "0.8rem",
-                    padding: "0.5rem 0.9rem",
-                    borderRadius: 999,
-                  }}
-                >
-                  <span aria-hidden>↗</span> {it.cat}
-                </span>
                 {/* expand — dark round (the reference's bottom-right button) */}
                 <span
                   style={{
@@ -398,7 +361,7 @@ export default function GalleryPinterest({
               }}
             />
 
-            {/* top bar: ✕ left | Share Save right */}
+            {/* top bar: ✕ only, top-left */}
             <div
               onClick={(e) => e.stopPropagation()}
               style={{
@@ -409,23 +372,13 @@ export default function GalleryPinterest({
                 zIndex: 210,
                 display: "flex",
                 alignItems: "center",
-                justifyContent: "space-between",
+                justifyContent: "flex-start",
                 padding: "14px clamp(16px, 3vw, 36px)",
               }}
             >
               <button aria-label="Close" onClick={() => setBox(null)} style={circleBtn}>
                 ✕
               </button>
-              <div style={{ display: "flex", gap: 10 }}>
-                <button style={shareBtn}>
-                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
-                    <circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/>
-                    <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/>
-                  </svg>
-                  Share
-                </button>
-                <button style={saveBtn}>Save</button>
-              </div>
             </div>
 
             {/* image card — overflow visible so child buttons can overlap the edge */}
@@ -523,34 +476,5 @@ const circleBtn: React.CSSProperties = {
   fontFamily: SANS,
   fontWeight: 700,
   boxShadow: "0 2px 10px rgba(0,0,0,0.18)",
-};
-
-const saveBtn: React.CSSProperties = {
-  background: "#E60023",
-  color: "#fff",
-  fontFamily: SANS,
-  fontWeight: 700,
-  fontSize: "1.1rem",
-  padding: "0.9rem 1.9rem",
-  borderRadius: 16,
-  border: "none",
-  cursor: "pointer",
-  letterSpacing: "0.01em",
-};
-
-const shareBtn: React.CSSProperties = {
-  background: "rgba(210,210,210,0.92)",
-  color: "#111",
-  fontFamily: SANS,
-  fontWeight: 700,
-  fontSize: "1.1rem",
-  padding: "0.9rem 1.9rem",
-  borderRadius: 16,
-  border: "none",
-  cursor: "pointer",
-  display: "flex",
-  alignItems: "center",
-  gap: 8,
-  boxShadow: "0 1px 8px rgba(0,0,0,0.12)",
 };
 

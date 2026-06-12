@@ -1,12 +1,10 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import {
   MotionValue,
   motion,
   useTransform,
   useMotionTemplate,
-  useMotionValueEvent,
 } from "framer-motion";
 import { BOOKING_HREF } from "@/lib/theme";
 
@@ -33,16 +31,23 @@ type Beat = {
 // LEAVES contradicts the message).
 const BEATS: Beat[] = [
   {
-    eyebrow: "Abishek TATTOO INK",
+    eyebrow: "InkSpire Tattoo",
     headline: "Beneath every layer.",
     window: [0, 0, 0.05, 0.15],
     startVisible: true,
   },
   {
+    // NEW — gives the pull-back (the reveal's hero moment) a voice. Copy is a
+    // creative placeholder, easy to swap.
+    eyebrow: "THE CRAFT",
+    headline: "Worn for a lifetime.",
+    window: [0.2, 0.32, 0.44, 0.54],
+  },
+  {
     eyebrow: "THE ART",
     headline: "Ink that's alive.",
     support: "Alive in the skin — and yours for life.",
-    window: [0.55, 0.7, 1, 1],
+    window: [0.58, 0.72, 1, 1],
     persist: true,
     cta: true,
   },
@@ -50,6 +55,75 @@ const BEATS: Beat[] = [
 
 const SCRIM =
   "linear-gradient(to top, rgba(0,0,0,0.82) 0%, rgba(0,0,0,0.4) 32%, rgba(0,0,0,0) 64%)";
+
+// Kinetic headline — each WORD rises + sharpens in a staggered cascade as the
+// beat enters, so the line "assembles" with the scroll instead of just fading in.
+// (Block-level opacity still handles presence/fade-out; words only add the rise.)
+function KineticWord({
+  progress, text, w0, w1, idx, count, startVisible,
+}: {
+  progress: MotionValue<number>;
+  text: string;
+  w0: number;
+  w1: number;
+  idx: number;
+  count: number;
+  startVisible: boolean;
+}) {
+  const per = Math.max(0.0001, w1 - w0) / Math.max(1, count);
+  const start = w0 + idx * per * 0.6;   // overlapping stagger
+  const end = start + per * 1.25;
+  const y = useTransform(progress, startVisible ? [0, 1] : [start, end], startVisible ? [0, 0] : [20, 0]);
+  const blurPx = useTransform(progress, startVisible ? [0, 1] : [start, end], startVisible ? [0, 0] : [6, 0]);
+  const filter = useMotionTemplate`blur(${blurPx}px)`;
+  return (
+    <motion.span
+      aria-hidden
+      style={{ display: "inline-block", y, filter, marginRight: "0.26em", willChange: "transform, filter" }}
+    >
+      {text}
+    </motion.span>
+  );
+}
+
+function KineticHeadline({
+  progress, text, w0, w1, startVisible,
+}: {
+  progress: MotionValue<number>;
+  text: string;
+  w0: number;
+  w1: number;
+  startVisible: boolean;
+}) {
+  const words = text.split(" ");
+  return (
+    <h2
+      aria-label={text}
+      style={{
+        fontFamily: SERIF,
+        fontWeight: 500,
+        fontSize: "clamp(2.6rem, 6vw, 6.4rem)",
+        lineHeight: 1.04,
+        color: GOLD,
+        margin: 0,
+        textShadow: "0 2px 34px rgba(0,0,0,0.7)",
+      }}
+    >
+      {words.map((word, i) => (
+        <KineticWord
+          key={i}
+          progress={progress}
+          text={word}
+          w0={w0}
+          w1={w1}
+          idx={i}
+          count={words.length}
+          startVisible={startVisible}
+        />
+      ))}
+    </h2>
+  );
+}
 
 function BeatBlock({
   progress,
@@ -68,11 +142,9 @@ function BeatBlock({
     : [0, 1, 1, beat.persist ? 1 : 0];
   const opacity = useTransform(progress, opIn, opOut);
 
-  const riseFrom = beat.startVisible ? 0 : 30;
-  const blurFrom = beat.startVisible ? 0 : 7;
-  const y = useTransform(progress, [w0, w1], [riseFrom, 0]);
-  const blurPx = useTransform(progress, [w0, w1], [blurFrom, 0]);
-  const filter = useMotionTemplate`blur(${blurPx}px)`;
+  // Subtle "settle" — the block eases in from a touch larger as it arrives, so
+  // the line reads like it's pulling into place with the reveal's camera.
+  const scale = useTransform(progress, [w0, w1], beat.startVisible ? [1, 1] : [1.035, 1]);
 
   return (
     <motion.div
@@ -98,8 +170,7 @@ function BeatBlock({
 
       <motion.div
         style={{
-          y,
-          filter,
+          scale,
           position: "relative",
           width: "min(900px, 90vw)",
           textAlign: "center",
@@ -121,19 +192,13 @@ function BeatBlock({
           </div>
         )}
 
-        <h2
-          style={{
-            fontFamily: SERIF,
-            fontWeight: 500,
-            fontSize: "clamp(2.6rem, 6vw, 6.4rem)",
-            lineHeight: 1.04,
-            color: GOLD,
-            margin: 0,
-            textShadow: "0 2px 34px rgba(0,0,0,0.7)",
-          }}
-        >
-          {beat.headline}
-        </h2>
+        <KineticHeadline
+          progress={progress}
+          text={beat.headline}
+          w0={w0}
+          w1={w1}
+          startVisible={!!beat.startVisible}
+        />
 
         {beat.support && (
           <p
@@ -181,104 +246,6 @@ function BeatBlock({
   );
 }
 
-// Stats — folded into the END of the Buddha sequence (replaces the standalone
-// StatsBand). Fade in over the held reveal, beneath the "Ink that's alive." slogan.
-const STATS = [
-  { value: 12, suffix: "+", label: "Years of craft" },
-  { value: 8, suffix: "", label: "Resident artists" },
-  { value: 5000, suffix: "+", label: "Pieces inked" },
-  { value: 30, suffix: "+", label: "Awards & features" },
-];
-
-function Stat({
-  value,
-  suffix,
-  label,
-  go,
-}: {
-  value: number;
-  suffix: string;
-  label: string;
-  go: boolean;
-}) {
-  const [n, setN] = useState(0);
-  useEffect(() => {
-    if (!go) return;
-    let raf = 0;
-    let start = 0;
-    const dur = 1400;
-    const step = (ts: number) => {
-      if (!start) start = ts;
-      const p = Math.min(1, (ts - start) / dur);
-      const eased = 1 - Math.pow(1 - p, 3);
-      setN(Math.round(value * eased));
-      if (p < 1) raf = requestAnimationFrame(step);
-    };
-    raf = requestAnimationFrame(step);
-    return () => cancelAnimationFrame(raf);
-  }, [go, value]);
-  return (
-    <div style={{ textAlign: "center" }}>
-      <div
-        style={{
-          fontFamily: SERIF,
-          fontWeight: 500,
-          fontSize: "clamp(2rem, 3.4vw, 3.2rem)",
-          lineHeight: 1,
-          color: GOLD,
-          textShadow: "0 2px 20px rgba(0,0,0,0.7)",
-        }}
-      >
-        {n.toLocaleString()}
-        {suffix}
-      </div>
-      <div
-        style={{
-          fontFamily: SANS,
-          textTransform: "uppercase",
-          letterSpacing: "0.16em",
-          fontSize: "0.68rem",
-          color: "rgba(255,255,255,0.72)",
-          marginTop: "0.6rem",
-        }}
-      >
-        {label}
-      </div>
-    </div>
-  );
-}
-
-function StatsReveal({ progress }: { progress: MotionValue<number> }) {
-  const opacity = useTransform(progress, [0.82, 0.94], [0, 1]);
-  const y = useTransform(progress, [0.82, 0.94], [24, 0]);
-  const [go, setGo] = useState(false);
-  useMotionValueEvent(progress, "change", (p) => {
-    if (p > 0.84) setGo(true);
-  });
-  return (
-    <motion.div
-      style={{
-        opacity,
-        y,
-        position: "absolute",
-        left: 0,
-        right: 0,
-        bottom: "clamp(26px, 6vh, 60px)",
-        display: "flex",
-        justifyContent: "center",
-        gap: "clamp(26px, 5vw, 80px)",
-        flexWrap: "wrap",
-        padding: "0 clamp(16px, 4vw, 48px)",
-        pointerEvents: "none",
-      }}
-    >
-      {STATS.map((s) => (
-        <Stat key={s.label} {...s} go={go} />
-      ))}
-    </motion.div>
-  );
-}
-
 export default function SpiderText({
   progress,
   embedded = false,
@@ -293,9 +260,6 @@ export default function SpiderText({
       {BEATS.map((beat, i) => (
         <BeatBlock key={i} progress={progress} beat={beat} embedded={embedded} />
       ))}
-
-      {/* stats — folded into the held reveal (homepage/embedded only) */}
-      {embedded && <StatsReveal progress={progress} />}
 
       {/* scroll hint — only on the standalone page (odd mid-homepage) */}
       {!embedded && (

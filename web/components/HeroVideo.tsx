@@ -6,8 +6,8 @@
 // scrolling up reverses it. Pure scrub: static when idle, no autoplay, no loop
 // seam, and the heavy per-frame work stays on the GPU (never on Lenis's back).
 
-import { useEffect, useRef } from "react";
-import { motion, useTransform, type MotionValue } from "framer-motion";
+import { useEffect, useRef, useState } from "react";
+import { type MotionValue } from "framer-motion";
 
 const SRC_WEBM = "/hero_scrub.webm"; // VP9 all-intra (primary)
 const SRC_MP4  = "/hero_scrub.mp4";  // H.264 all-intra (Safari fallback)
@@ -25,7 +25,16 @@ const triEased = (p: number) => {
 
 export default function HeroVideo({ progress }: { progress: MotionValue<number> }) {
   const videoRef = useRef<HTMLVideoElement>(null);
-  const scale = useTransform(progress, [0, 1], [1, 1.2]);
+  const [videoSrc, setVideoSrc] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const globalUrl = (window as any).__heroVideoUrl;
+      if (globalUrl) {
+        setVideoSrc(globalUrl);
+      }
+    }
+  }, []);
 
   // Scroll → currentTime via the eased triangle (one clock). Seeks only on change
   // (no idle rAF); all-intra encode keeps each seek frame-accurate.
@@ -49,11 +58,12 @@ export default function HeroVideo({ progress }: { progress: MotionValue<number> 
       unsub();
       v.removeEventListener("loadedmetadata", onMeta);
     };
-  }, [progress]);
+  }, [progress, videoSrc]);
 
   return (
-    <motion.video
+    <video
       ref={videoRef}
+      src={videoSrc || undefined}
       poster={POSTER}
       muted
       playsInline
@@ -65,13 +75,16 @@ export default function HeroVideo({ progress }: { progress: MotionValue<number> 
         width: "100%",
         height: "100%",
         objectFit: "cover",
-        scale,
         filter: "contrast(1.06) saturate(1.04)",
         pointerEvents: "none",
       }}
     >
-      <source src={SRC_WEBM} type="video/webm" />
-      <source src={SRC_MP4} type="video/mp4" />
-    </motion.video>
+      {!videoSrc && (
+        <>
+          <source src={SRC_WEBM} type="video/webm" />
+          <source src={SRC_MP4} type="video/mp4" />
+        </>
+      )}
+    </video>
   );
 }

@@ -7,7 +7,7 @@
 // GPU transform (scale + transform-origin) driven by the same scroll progress, so
 // the story beat is byte-for-byte the same — only the renderer changed.
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   motion,
   useTransform,
@@ -65,6 +65,16 @@ export default function BuddhaVideo({
 }) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const rz = mobile ? REVEAL_ZOOM_MOBILE : REVEAL_ZOOM;
+  const [videoSrc, setVideoSrc] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const globalUrl = (window as any).__buddhaVideoUrl;
+      if (globalUrl) {
+        setVideoSrc(globalUrl);
+      }
+    }
+  }, []);
 
   // Camera: zoom = lerp(rz → 1.0) over e; focal eases from the zipper pull to centre.
   const scale = useTransform(progress, (p) => {
@@ -101,11 +111,12 @@ export default function BuddhaVideo({
       unsub();
       v.removeEventListener("loadedmetadata", onMeta);
     };
-  }, [progress]);
+  }, [progress, videoSrc]);
 
   return (
     <motion.video
       ref={videoRef}
+      src={videoSrc || undefined}
       muted
       playsInline
       preload="auto"
@@ -122,8 +133,12 @@ export default function BuddhaVideo({
         pointerEvents: "none",
       }}
     >
-      <source src={SRC_WEBM} type="video/webm" />
-      <source src={SRC_MP4} type="video/mp4" />
+      {!videoSrc && (
+        <>
+          <source src={SRC_WEBM} type="video/webm" />
+          <source src={SRC_MP4} type="video/mp4" />
+        </>
+      )}
     </motion.video>
   );
 }
