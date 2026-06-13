@@ -6,12 +6,12 @@
 // scrolling up reverses it. Pure scrub: static when idle, no autoplay, no loop
 // seam, and the heavy per-frame work stays on the GPU (never on Lenis's back).
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import { type MotionValue } from "framer-motion";
 
 const SRC_WEBM = "/hero_scrub.webm"; // VP9 all-intra (primary)
 const SRC_MP4  = "/hero_scrub.mp4";  // H.264 all-intra (Safari fallback)
-const POSTER   = "/hero_poster.webp"; // seals the first-paint flash
+const POSTER   = "/hero_poster.webp"; // seals the first-paint flash while the video streams
 
 const easeInOutQuad = (t: number) =>
   t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
@@ -25,19 +25,11 @@ const triEased = (p: number) => {
 
 export default function HeroVideo({ progress }: { progress: MotionValue<number> }) {
   const videoRef = useRef<HTMLVideoElement>(null);
-  const [videoSrc, setVideoSrc] = useState<string | null>(null);
-
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      const globalUrl = (window as any).__heroVideoUrl;
-      if (globalUrl) {
-        setVideoSrc(globalUrl);
-      }
-    }
-  }, []);
 
   // Scroll → currentTime via the eased triangle (one clock). Seeks only on change
-  // (no idle rAF); all-intra encode keeps each seek frame-accurate.
+  // (no idle rAF); all-intra encode keeps each seek frame-accurate. The video
+  // streams progressively (Phase 0.1 — no preloader gate); the poster covers
+  // until enough is buffered to seek.
   useEffect(() => {
     const v = videoRef.current;
     if (!v) return;
@@ -58,12 +50,11 @@ export default function HeroVideo({ progress }: { progress: MotionValue<number> 
       unsub();
       v.removeEventListener("loadedmetadata", onMeta);
     };
-  }, [progress, videoSrc]);
+  }, [progress]);
 
   return (
     <video
       ref={videoRef}
-      src={videoSrc || undefined}
       poster={POSTER}
       muted
       playsInline
@@ -79,12 +70,8 @@ export default function HeroVideo({ progress }: { progress: MotionValue<number> 
         pointerEvents: "none",
       }}
     >
-      {!videoSrc && (
-        <>
-          <source src={SRC_WEBM} type="video/webm" />
-          <source src={SRC_MP4} type="video/mp4" />
-        </>
-      )}
+      <source src={SRC_WEBM} type="video/webm" />
+      <source src={SRC_MP4} type="video/mp4" />
     </video>
   );
 }

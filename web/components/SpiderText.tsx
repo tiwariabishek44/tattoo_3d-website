@@ -12,7 +12,7 @@ import { BOOKING_HREF } from "@/lib/theme";
 // (the chest/spider sits dead-center, so side text would collide). Each beat
 // fades in + rises + focuses, then fades out, mapped to a scroll window.
 
-const SERIF = "var(--font-cormorant), Georgia, serif";
+const SERIF = "var(--font-fraunces), Georgia, serif";
 const SANS = "var(--font-inter), system-ui, sans-serif";
 const GOLD = "#CBA45A";
 
@@ -31,7 +31,7 @@ type Beat = {
 // LEAVES contradicts the message).
 const BEATS: Beat[] = [
   {
-    eyebrow: "InkSpire Tattoo",
+    eyebrow: "Teyung Tattook Ink",
     headline: "Beneath every layer.",
     window: [0, 0, 0.05, 0.15],
     startVisible: true,
@@ -102,8 +102,10 @@ function KineticHeadline({
       style={{
         fontFamily: SERIF,
         fontWeight: 500,
-        fontSize: "clamp(2.6rem, 6vw, 6.4rem)",
+        // TYPE.h2 (theme.ts) — beat text sits below the hero/CTA display tier
+        fontSize: "clamp(2.6rem, 5vw, 5rem)",
         lineHeight: 1.04,
+        letterSpacing: "-0.02em",
         color: GOLD,
         margin: 0,
         textShadow: "0 2px 34px rgba(0,0,0,0.7)",

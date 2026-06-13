@@ -13,7 +13,7 @@
 // Assets: 3 jungle/animal stills in ROTATION across 6 slides. No auto-advance.
 import { useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { SERIF, SANS, COLORS, GUTTER, BOOKING_HREF, withAlpha } from "@/lib/theme";
+import { SERIF, SANS, COLORS, GUTTER, BOOKING_HREF, withAlpha, eyebrow, TYPE } from "@/lib/theme";
 import { SERVICE_VH, getDesktopSectionHeight } from "@/lib/scrollBudget";
 import { EASE_MECHANICAL } from "@/lib/motionTokens";
 import { useReducedMotionSafe } from "@/lib/useReducedMotionSafe";
@@ -34,7 +34,10 @@ const EASE = EASE_MECHANICAL;
 
 type Slide = { img: string; accent: string; desc: string; place: string; sub: string };
 
-const HEADING = "Our Service Offering"; // bold main heading (top)
+// Phase 2.3 (roadmap T2) — brand voice, not corporate; and demoted from 8rem
+// hero scale to a small section label (TYPE discipline: labels whisper, the
+// work speaks).
+const HEADING = "What we ink";
 const TITLE = "The art of"; // per-service heading lead-in; the service is the accent line
 
 // Service slides — natural copy. Heading reads "The art of" + the service (gold
@@ -259,18 +262,11 @@ export default function ServiceSlider() {
                 exit="exit"
                 style={{ maxWidth: compact ? "100%" : "min(760px, 64%)" }}
               >
-                {/* main heading — hero typography DNA (matches machine scroll sequence) */}
+                {/* section label — eyebrow scale; the per-service statement
+                    below carries the section's voice */}
                 <motion.div
                   variants={txtLine}
-                  style={{
-                    fontFamily: SERIF,
-                    fontWeight: 500,
-                    fontSize: "clamp(3.2rem, 7vw, 8rem)",
-                    lineHeight: 1.02,
-                    color: COLORS.gold,
-                    marginBottom: "1.4rem",
-                    textShadow: "0 2px 30px rgba(0,0,0,0.6)",
-                  }}
+                  style={{ ...eyebrow(), marginBottom: "1.6rem" }}
                 >
                   {HEADING}
                 </motion.div>
@@ -279,8 +275,7 @@ export default function ServiceSlider() {
                   style={{
                     fontFamily: SERIF,
                     fontWeight: 500,
-                    fontSize: "clamp(1.4rem, 2.6vw, 2.3rem)",
-                    lineHeight: 1.1,
+                    ...TYPE.h2,
                     color: COLORS.offWhite,
                     margin: 0,
                     textShadow: "0 1px 16px rgba(0,0,0,0.4)",
@@ -293,8 +288,7 @@ export default function ServiceSlider() {
                   style={{
                     fontFamily: SERIF,
                     fontWeight: 500,
-                    fontSize: "clamp(1.4rem, 2.6vw, 2.3rem)",
-                    lineHeight: 1.1,
+                    ...TYPE.h2,
                     color: ACCENT,
                     margin: 0,
                     textShadow: "0 1px 16px rgba(0,0,0,0.4)",

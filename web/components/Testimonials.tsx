@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import {
   motion, AnimatePresence, LayoutGroup, useAnimation, useScroll,
 } from "framer-motion";
-import { SERIF, SANS, COLORS, eyebrow, GUTTER } from "@/lib/theme";
+import { SERIF, SANS, COLORS, eyebrow, GUTTER, TYPE } from "@/lib/theme";
 import { useParallax } from "@/lib/useParallax";
 import { PARALLAX_MID } from "@/lib/motionTokens";
 import { useScrollLock } from "@/lib/useScrollLock";
@@ -297,7 +297,7 @@ function DetailModal({ review, lampId, onClose }: {
             </p>
             <div style={{ height: 1, background: "rgba(27,22,15,0.14)", margin: "1.25rem 0 1.1rem" }} />
             <p style={{ fontFamily: SANS, fontWeight: 400, fontSize: "1.06rem", lineHeight: 1.72, color: COLORS.inkText, opacity: 0.84, margin: 0 }}>
-              Tattooed by <strong>{review.artist}</strong> at InkSpire Tattoo, Kathmandu —
+              Tattooed by <strong>{review.artist}</strong> at Teyung Tattook Ink, Kathmandu —
               a {review.style.toLowerCase()} designed specifically for {firstName}, permanent and personal.
             </p>
             <div style={{ display: "flex", gap: compact ? "1.1rem" : "1.6rem", marginTop: "1.4rem", paddingTop: "1.2rem", borderTop: "1px solid rgba(27,22,15,0.1)" }}>
@@ -589,8 +589,10 @@ export default function Testimonials() {
             }}
           >
             <div style={{ ...eyebrow(COLORS.gold), marginBottom: "1rem" }}>In their words</div>
-            <h2 style={{ fontFamily: SANS, fontWeight: 800, fontSize: "clamp(3rem, 7vw, 7rem)", lineHeight: 1.04, letterSpacing: "-0.03em", color: COLORS.ink, margin: 0 }}>
-              Where Review Matters
+            {/* Phase 2.2/2.3 — back into the serif voice (the lone sans-800
+                display was off-DNA) and out of corporate phrasing. */}
+            <h2 style={{ fontFamily: SERIF, fontWeight: 600, ...TYPE.h2, color: COLORS.inkText, margin: 0 }}>
+              Word travels.
             </h2>
             {/* proof-stat row */}
             <div style={{ display: "flex", justifyContent: "center", gap: "clamp(28px, 5vw, 72px)", marginTop: "clamp(22px, 3vh, 38px)", flexWrap: "wrap" }}>

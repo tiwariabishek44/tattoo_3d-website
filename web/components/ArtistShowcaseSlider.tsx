@@ -14,12 +14,14 @@
 //     from the homepage Artists cards, not generic service blurb.
 import { useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence, LayoutGroup } from "framer-motion";
-import { SERIF, SANS, COLORS, GUTTER } from "@/lib/theme";
+import { SERIF, SANS, COLORS, GUTTER, eyebrow, TYPE } from "@/lib/theme";
 import { useScrollLock } from "@/lib/useScrollLock";
 
 const STUDIO_IMG = "/studio_interior_2.jpg";
 
-const HEADING = "Meet the artists."; // constant headline — DNA match for "Our Service Offering"
+// Phase 2.2 (roadmap T2) — demoted from 8rem to a section label; the artist's
+// NAME is the subject and carries the scale.
+const HEADING = "The hands behind it";
 
 type Artist = {
   img: string;
@@ -298,27 +300,16 @@ export default function ArtistShowcaseSlider() {
           }}
         >
         <div key={active} style={{ maxWidth: compact ? "100%" : (medium ? "min(480px, 44%)" : "min(680px, 56%)") }}>
-          <div
-            style={{
-              fontFamily: SERIF,
-              fontWeight: 500,
-              fontSize: "clamp(3.2rem, 7vw, 8rem)",
-              lineHeight: 1.02,
-              color: COLORS.offWhite,
-              marginBottom: "1.4rem",
-              textShadow: "0 2px 30px rgba(0,0,0,0.6)",
-            }}
-          >
+          <div style={{ ...eyebrow(), marginBottom: "1.6rem" }}>
             {HEADING}
           </div>
 
-          {/* the artist's name — the subject, off-white & large */}
+          {/* the artist's name — the subject, promoted to section voice */}
           <h1
             style={{
               fontFamily: SERIF,
               fontWeight: 500,
-              fontSize: "clamp(1.6rem, 3vw, 2.5rem)",
-              lineHeight: 1.1,
+              ...TYPE.h2,
               color: COLORS.offWhite,
               margin: 0,
               textShadow: "0 1px 16px rgba(0,0,0,0.4)",

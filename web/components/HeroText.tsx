@@ -3,7 +3,7 @@
 import { MotionValue, motion, useTransform, useMotionTemplate } from "framer-motion";
 
 // ── Type / color tokens ─────────────────────────────────
-const SERIF = "var(--font-cormorant), Georgia, serif";
+const SERIF = "var(--font-fraunces), Georgia, serif";
 const SANS = "var(--font-inter), system-ui, sans-serif";
 const GOLD = "#CBA45A"; // brand gold (matches the machine's brass)
 const COLUMN = "min(680px, 48vw)";
@@ -24,7 +24,7 @@ type Slogan = {
 
 const SLOGANS: Slogan[] = [
   {
-    eyebrow: "InkSpire Tattoo",
+    eyebrow: "Teyung Tattook Ink",
     headline: "Permanence is a craft.",
     support:
       "A tattoo outlives the moment it's made. We treat every one exactly that way — considered, deliberate, built to last a lifetime.",
@@ -242,8 +242,11 @@ function SloganBlock({
           style={{
             fontFamily: SERIF,
             fontWeight: 500,
-            fontSize: "clamp(3.2rem, 7vw, 8rem)",
-            lineHeight: 1.02,
+            // TYPE.display (theme.ts) — the hero promise is one of exactly two
+            // display-scale moments on the site (the other: BookingCTA apex).
+            fontSize: "clamp(4.5rem, 9vw, 11rem)",
+            lineHeight: 0.95,
+            letterSpacing: "-0.04em",
             color: hlColor,
             opacity: hlOpacity,
             y: hlYExit,

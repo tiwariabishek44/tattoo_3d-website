@@ -1,14 +1,17 @@
 import type { Metadata } from "next";
-import { Cormorant_Garamond, Inter } from "next/font/google";
+import { Fraunces, Inter } from "next/font/google";
 import "./globals.css";
 import CustomCursor from "@/components/CustomCursor";
 import SmoothScroll from "@/components/SmoothScroll";
 
-const cormorant = Cormorant_Garamond({
+// Phase 2.1 (roadmap T2) — display serif with a voice. Fraunces variable:
+// full weight range + the optical-size axis, so it stays inky and structural
+// at 11rem display sizes instead of going wispy (Cormorant's disease).
+const fraunces = Fraunces({
   subsets: ["latin"],
-  weight: ["300", "400", "500"],
-  variable: "--font-cormorant",
+  variable: "--font-fraunces",
   display: "swap",
+  axes: ["opsz"],
 });
 
 const inter = Inter({
@@ -19,7 +22,7 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "InkSpire Tattoo",
+  title: "Teyung Tattook Ink",
   description: "Permanence is a craft.",
 };
 
@@ -29,7 +32,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className={`${cormorant.variable} ${inter.variable}`}>
+    <html lang="en" className={`${fraunces.variable} ${inter.variable}`}>
       <body>
         <CustomCursor />
         <SmoothScroll>

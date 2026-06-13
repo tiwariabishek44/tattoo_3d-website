@@ -31,3 +31,6 @@ Thumbs.db
 
 # typescript build cache
 *.tsbuildinfo
+
+# playwright MCP debug artifacts (screenshots, console logs, snapshots)
+.playwright-mcp/

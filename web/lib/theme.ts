@@ -1,6 +1,38 @@
-// Shared design tokens for the InkSpire Tattoo site.
-export const SERIF = "var(--font-cormorant), Georgia, serif";
+// Shared design tokens for the Teyung Tattook Ink site.
+export const SERIF = "var(--font-fraunces), Georgia, serif";
 export const SANS = "var(--font-inter), system-ui, sans-serif";
+
+// ── Type scale (Phase 2.2, roadmap T2) ─────────────────────────────────────
+// Five steps, enforced everywhere. display is reserved for the hero promise
+// and the CTA apex ONLY — when everything shouts, nothing lands. Tracking
+// tightens as size grows; line-height closes in on the display end.
+export const TYPE = {
+  display: {
+    fontSize: "clamp(4.5rem, 9vw, 11rem)",
+    lineHeight: 0.95,
+    letterSpacing: "-0.04em",
+  },
+  h2: {
+    fontSize: "clamp(2.6rem, 5vw, 5rem)",
+    lineHeight: 1.04,
+    letterSpacing: "-0.02em",
+  },
+  h3: {
+    fontSize: "clamp(1.6rem, 2.6vw, 2.4rem)",
+    lineHeight: 1.15,
+    letterSpacing: "-0.01em",
+  },
+  lead: {
+    fontSize: "clamp(1.25rem, 1.8vw, 1.5rem)",
+    lineHeight: 1.5,
+    letterSpacing: "0em",
+  },
+  body: {
+    fontSize: "clamp(1.06rem, 1.2vw, 1.15rem)",
+    lineHeight: 1.7,
+    letterSpacing: "0em",
+  },
+} as const;
 
 export const COLORS = {
   ink: "#070605", // near-black, barely-there warmth (primary dark)
@@ -44,7 +76,19 @@ export const GUTTER = "clamp(16px, 1.8vw, 28px)"; // shared side gutter / left r
 export const frame = (n: number) =>
   `/frames/frame_${String(n).padStart(6, "0")}.webp`;
 
-// Single source of truth for the "book" action. Honest interim per
-// HOMEPAGE_FRAGRANCE_PLAN.md Q3 (mailto / contact) — swap for a real booking
-// flow/URL later in ONE place and every CTA on the site follows.
-export const BOOKING_HREF = "mailto:hello@inkspire.tattoo?subject=Booking%20enquiry%20%E2%80%94%20InkSpire%20Tattoo";
+// ── Booking & contact registry (Phase 0.3, roadmap M2) ────────────────────
+// Single source of truth for every conversion target on the site.
+// [LINK-SWAP LATER]: when the studio's real channels arrive, swap the values
+// below (and the form action in app/book/page.tsx) — every CTA follows.
+export const BOOKING_HREF = "/book"; // all "Book a session" CTAs land here
+export const BOOKING_EMAIL = "hello@inkspire.tattoo"; // placeholder
+export const WHATSAPP_HREF = "https://wa.me/9779800000000"; // placeholder number
+export const INSTAGRAM_HREF = "https://instagram.com/inkspire.tattoo"; // placeholder handle
+
+// Trust strip — answers the tourist's real questions before they're asked.
+export const TRUST_POINTS = [
+  "Thamel, Kathmandu",
+  "English spoken",
+  "Single-use needles",
+  "Walk-ins & bookings",
+];

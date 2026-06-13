@@ -3,10 +3,10 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import BookButton from "@/components/BookButton";
 import Reveal from "@/components/Reveal";
-import { SERIF, SANS, COLORS, eyebrow, GUTTER } from "@/lib/theme";
+import { SERIF, SANS, COLORS, eyebrow, GUTTER, BOOKING_EMAIL } from "@/lib/theme";
 
 export const metadata: Metadata = {
-  title: "After Care — InkSpire Tattoo",
+  title: "After Care — Teyung Tattook Ink",
   description:
     "How to care for a fresh tattoo so it heals clean and stays sharp — the InkSpire aftercare guide.",
 };
@@ -247,7 +247,7 @@ export default function AfterCarePage() {
             }}
           >
             <a
-              href="mailto:hello@inkspire.tattoo"
+              href={`mailto:${BOOKING_EMAIL}`}
               style={{
                 fontFamily: SANS,
                 textTransform: "uppercase",

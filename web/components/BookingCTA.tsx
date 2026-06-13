@@ -9,7 +9,8 @@
 
 import { motion } from "framer-motion";
 import Reveal from "./Reveal";
-import { SERIF, SANS, COLORS, eyebrow, GUTTER, BOOKING_HREF, withAlpha } from "@/lib/theme";
+import TrustStrip from "./TrustStrip";
+import { SERIF, SANS, COLORS, eyebrow, GUTTER, BOOKING_HREF, withAlpha, TYPE } from "@/lib/theme";
 import { EASE_ARRIVAL, EASE_MECHANICAL } from "@/lib/motionTokens";
 
 const BG = "/crousal_images2/realism_tattoo1.jpeg"; // ink on skin — "your mark"
@@ -55,7 +56,7 @@ export default function BookingCTA() {
       <div style={{ position: "relative", zIndex: 2 }}>
         <Reveal variant="rule">
           <div style={{ ...eyebrow(), marginBottom: "1.6rem" }}>
-            InkSpire Tattoo
+            Teyung Tattook Ink
           </div>
         </Reveal>
         <Reveal delay={0.08} variant="heading">
@@ -63,8 +64,9 @@ export default function BookingCTA() {
             style={{
               fontFamily: SERIF,
               fontWeight: 500,
-              fontSize: "clamp(3rem, 8vw, 8.5rem)",
-              lineHeight: 1,
+              // TYPE.display — the CTA apex is the site's second (and last)
+              // display-scale moment.
+              ...TYPE.display,
               color: COLORS.gold,
               margin: 0,
               textShadow: "0 2px 40px rgba(0,0,0,0.5)",
@@ -110,6 +112,11 @@ export default function BookingCTA() {
           >
             Book a session
           </motion.a>
+        </Reveal>
+        {/* trust strip — answers where/language/hygiene/availability right at
+            the decision point (Phase 0.3, roadmap M2) */}
+        <Reveal delay={0.32} variant="body">
+          <TrustStrip style={{ marginTop: "2.4rem" }} />
         </Reveal>
       </div>
     </section>

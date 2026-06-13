@@ -2,33 +2,33 @@
 // glowing in gold. Chosen over the light/oxblood concept so the whole experience
 // stays in one premium mood from hero to footer.
 
-import { BOOKING_HREF } from "@/lib/theme";
+import { BOOKING_HREF, BOOKING_EMAIL, INSTAGRAM_HREF } from "@/lib/theme";
 
 const SANS = "var(--font-inter), system-ui, sans-serif";
-const SERIF = "var(--font-cormorant), Georgia, serif";
+const SERIF = "var(--font-fraunces), Georgia, serif";
 const SIDE = "clamp(24px, 4.7vw, 90px)";
-const IG_URL = "https://instagram.com/inkspire.tattoo";
+const IG_URL = INSTAGRAM_HREF; // single swap point: lib/theme.ts
 
-const INK     = "#0B0907";
-const GOLD    = "#CBA45A";
-const GLOW    = "drop-shadow(0 0 22px rgba(203,164,90,0.34))";
-const LINK    = "rgba(242,239,233,0.70)";
-const MUTED   = "rgba(242,239,233,0.40)";
+const INK = "#0B0907";
+const GOLD = "#CBA45A";
+const GLOW = "drop-shadow(0 0 22px rgba(203,164,90,0.34))";
+const LINK = "rgba(242,239,233,0.70)";
+const MUTED = "rgba(242,239,233,0.40)";
 const DIVIDER = "rgba(203,164,90,0.28)";
 
 const COL1: { label: string; href: string }[] = [
-  { label: "Home",       href: "/#top" },
-  { label: "About",      href: "/#about" },
-  { label: "Styles",     href: "/#styles" },
-  { label: "Gallery",    href: "/#gallery" },
-  { label: "Artists",    href: "/#artists" },
+  { label: "Home", href: "/#top" },
+  { label: "About", href: "/#about" },
+  { label: "Styles", href: "/#styles" },
+  { label: "Gallery", href: "/#gallery" },
+  { label: "Artists", href: "/#artists" },
   { label: "After Care", href: "/after-care" },
 ];
 const COL2: { label: string; href: string }[] = [
-  { label: "Instagram",        href: IG_URL },
-  { label: "hello@inkspire.tattoo", href: "mailto:hello@inkspire.tattoo" },
-  { label: "Book a session",   href: BOOKING_HREF },
-  { label: "Find the studio",  href: "/#contact" },
+  { label: "Instagram", href: IG_URL },
+  { label: BOOKING_EMAIL, href: `mailto:${BOOKING_EMAIL}` },
+  { label: "Book a session", href: BOOKING_HREF },
+  { label: "Find the studio", href: "/#contact" },
 ];
 const BOTTOM = ["After Care", "Instagram", "Contact"];
 
@@ -106,7 +106,7 @@ export default function Footer() {
         <svg
           viewBox="0 0 1000 330"
           role="img"
-          aria-label="InkSpire Tattoo"
+          aria-label="Teyung Tattook Ink"
           // Responsive sizing via CSS (height:auto is valid in CSS — the old
           // height="auto" *attribute* was the console error). viewBox holds ratio.
           style={{ display: "block", width: "100%", height: "auto", filter: GLOW }}
@@ -121,7 +121,7 @@ export default function Footer() {
             fontSize="150"
             fill={GOLD}
           >
-            InkSpire
+            Teyung Tattoo
           </text>
           <text
             x="500"
@@ -132,7 +132,7 @@ export default function Footer() {
             fontSize="150"
             fill={GOLD}
           >
-            Tattoo
+            Ink
           </text>
         </svg>
       </div>
@@ -154,15 +154,15 @@ export default function Footer() {
           color: MUTED,
         }}
       >
-        <span>© 2026 InkSpire Tattoo · Thamel, Kathmandu</span>
+        <span>© 2026 Teyung Tattook Ink · Thamel, Kathmandu</span>
         <div style={{ display: "flex", gap: "clamp(18px, 2.2vw, 32px)", flexWrap: "wrap" }}>
           {BOTTOM.map((l) => (
             <a
               key={l}
               href={
                 l === "After Care" ? "/after-care"
-                : l === "Instagram" ? IG_URL
-                : "mailto:hello@inkspire.tattoo"
+                  : l === "Instagram" ? IG_URL
+                    : `mailto:${BOOKING_EMAIL}`
               }
               style={{
                 color: MUTED,
